@@ -131,30 +131,15 @@
                 showStatus('Iniciando inicialização do banco de dados...');
                 console.log('Iniciando processo de inicialização...');
 
-                // Verificar conexão com o Firebase
-                console.log('Verificando conexão com o Firebase...');
-                const connectedRef = database.ref('.info/connected');
-                
-                // Criar uma Promise para verificar a conexão
-                const connectionPromise = new Promise((resolve, reject) => {
-                    const timeout = setTimeout(() => {
-                        reject(new Error('Timeout ao verificar conexão com o Firebase'));
-                    }, 5000);
-
-                    connectedRef.once('value', (snap) => {
-                        clearTimeout(timeout);
-                        if (snap.val() === true) {
-                            console.log('Conectado ao Firebase!');
-                            resolve(true);
-                        } else {
-                            console.log('Desconectado do Firebase!');
-                            reject(new Error('Não foi possível conectar ao Firebase'));
-                        }
-                    });
-                });
-
-                // Aguardar a conexão
-                await connectionPromise;
+                // Testar conexão com o Firebase
+                console.log('Testando conexão com o Firebase...');
+                try {
+                    await database.ref('test').set({ timestamp: Date.now() });
+                    console.log('Conexão com o Firebase estabelecida com sucesso!');
+                } catch (error) {
+                    console.error('Erro ao testar conexão:', error);
+                    throw new Error('Não foi possível conectar ao Firebase. Verifique se o banco de dados está ativo.');
+                }
 
                 // Inicializar dados de madeira
                 console.log('Inicializando dados de madeira...');
