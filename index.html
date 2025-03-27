@@ -1,0 +1,39 @@
+// Inicializar quando o documento estiver pronto
+document.addEventListener('DOMContentLoaded', () => {
+    initializeData();
+    loadCompanyLogo();
+    loadQuotes();
+});
+
+function initializeData() {
+    // Verificar se já existe dados de madeira
+    if (!localStorage.getItem('woodData')) {
+        const woodData = [
+            { name: 'Angelim Vermelho', price: 95000, visible: true },
+            { name: 'Jatobá', price: 134928, visible: true },
+            { name: 'Cumaru', price: 120000, visible: true },
+            { name: 'Ipê', price: 150000, visible: true },
+            { name: 'Maçaranduba', price: 130000, visible: true },
+            { name: 'Cedro', price: 80000, visible: true },
+            { name: 'Freijó', price: 90000, visible: true },
+            { name: 'Sucupira', price: 110000, visible: true },
+            { name: 'Grapia', price: 95000, visible: true },
+            { name: 'Peroba', price: 100000, visible: true }
+        ];
+        localStorage.setItem('woodData', JSON.stringify(woodData));
+    }
+
+    // Verificar se já existe configurações da empresa
+    if (!localStorage.getItem('companySettings')) {
+        const settings = {
+            name: 'JN Madeiras',
+            phone: '(91) 99131-1049',
+            email: 'contato@jnmadeiras.com.br',
+            address: 'Rua Principal, 123 - Centro',
+            city: 'Belém',
+            state: 'PA',
+            logo: 'Logo JN.png'
+        };
+        localStorage.setItem('companySettings', JSON.stringify(settings));
+    }
+} 
