@@ -129,37 +129,69 @@
         async function initializeDatabase() {
             try {
                 showStatus('Iniciando inicialização do banco de dados...');
+                console.log('Iniciando processo de inicialização...');
+
+                // Verificar conexão com o Firebase
+                console.log('Verificando conexão com o Firebase...');
+                const connectedRef = database.ref('.info/connected');
+                connectedRef.on('value', (snap) => {
+                    if (snap.val() === true) {
+                        console.log('Conectado ao Firebase!');
+                    } else {
+                        console.log('Desconectado do Firebase!');
+                    }
+                });
 
                 // Inicializar dados de madeira
+                console.log('Inicializando dados de madeira...');
                 await database.ref('woodData').set(defaultWoodData);
+                console.log('Dados de madeira salvos com sucesso');
                 showStatus('Dados de madeira inicializados com sucesso!');
 
                 // Inicializar texto promocional
+                console.log('Inicializando texto promocional...');
                 await database.ref('promoText').set(defaultPromoText);
+                console.log('Texto promocional salvo com sucesso');
                 showStatus('Texto promocional inicializado com sucesso!');
 
                 // Inicializar configurações da empresa
+                console.log('Inicializando configurações da empresa...');
                 await database.ref('companySettings').set(defaultCompanySettings);
+                console.log('Configurações da empresa salvas com sucesso');
                 showStatus('Configurações da empresa inicializadas com sucesso!');
 
                 // Inicializar estrutura de orçamentos
+                console.log('Inicializando estrutura de orçamentos...');
                 await database.ref('quotes').set(defaultQuotes);
+                console.log('Estrutura de orçamentos salva com sucesso');
                 showStatus('Estrutura de orçamentos inicializada com sucesso!');
 
                 // Inicializar estrutura de notificações
+                console.log('Inicializando estrutura de notificações...');
                 await database.ref('notifications').set(defaultNotifications);
+                console.log('Estrutura de notificações salva com sucesso');
                 showStatus('Estrutura de notificações inicializada com sucesso!');
 
                 // Inicializar estrutura de usuários
+                console.log('Inicializando estrutura de usuários...');
                 await database.ref('users').set(defaultUsers);
+                console.log('Estrutura de usuários salva com sucesso');
                 showStatus('Estrutura de usuários inicializada com sucesso!');
 
                 showStatus('Banco de dados inicializado com sucesso!');
+                console.log('Processo de inicialização concluído com sucesso!');
             } catch (error) {
-                console.error('Erro ao inicializar banco de dados:', error);
+                console.error('Erro detalhado ao inicializar banco de dados:', error);
+                console.error('Stack trace:', error.stack);
                 showStatus('Erro ao inicializar banco de dados: ' + error.message, true);
             }
         }
+
+        // Adicionar listener para erros de conexão
+        database.ref().on('error', (error) => {
+            console.error('Erro de conexão com o Firebase:', error);
+            showStatus('Erro de conexão com o Firebase: ' + error.message, true);
+        });
     </script>
 </body>
 </html> 
