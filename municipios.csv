@@ -1,0 +1,106 @@
+id;nome;nome_uf;uf
+1;São Paulo;São Paulo;SP
+2;Rio de Janeiro;Rio de Janeiro;RJ
+3;Belo Horizonte;Minas Gerais;MG
+4;Salvador;Bahia;BA
+5;Brasília;Distrito Federal;DF
+6;Curitiba;Paraná;PR
+7;Manaus;Amazonas;AM
+8;Vitória;Espírito Santo;ES
+9;Goiânia;Goiás;GO
+10;Recife;Pernambuco;PE
+11;Belém;Pará;PA
+12;Porto Alegre;Rio Grande do Sul;RS
+13;Florianópolis;Santa Catarina;SC
+14;Campo Grande;Mato Grosso do Sul;MS
+15;Cuiabá;Mato Grosso;MT
+16;Guarulhos;São Paulo;SP
+17;Campinas;São Paulo;SP
+18;Niterói;Rio de Janeiro;RJ
+19;Uberlândia;Minas Gerais;MG
+20;Feira de Santana;Bahia;BA
+21;Ceilândia;Distrito Federal;DF
+22;Londrina;Paraná;PR
+23;Parintins;Amazonas;AM
+24;Vila Velha;Espírito Santo;ES
+25;Aparecida de Goiânia;Goiás;GO
+26;Jaboatão dos Guararapes;Pernambuco;PE
+27;Ananindeua;Pará;PA
+28;Caxias do Sul;Rio Grande do Sul;RS
+29;Joinville;Santa Catarina;SC
+30;Dourados;Mato Grosso do Sul;MS
+31;Santos;São Paulo;SP
+32;Ribeirão Preto;São Paulo;SP
+33;Osasco;São Paulo;SP
+34;São Bernardo do Campo;São Paulo;SP
+35;São José dos Campos;São Paulo;SP
+36;Duque de Caxias;Rio de Janeiro;RJ
+37;Nova Iguaçu;Rio de Janeiro;RJ
+38;São Gonçalo;Rio de Janeiro;RJ
+39;Macaé;Rio de Janeiro;RJ
+40;Petrópolis;Rio de Janeiro;RJ
+41;Contagem;Minas Gerais;MG
+42;Juiz de Fora;Minas Gerais;MG
+43;Betim;Minas Gerais;MG
+44;Montes Claros;Minas Gerais;MG
+45;Uberaba;Minas Gerais;MG
+46;Vitória da Conquista;Bahia;BA
+47;Camaçari;Bahia;BA
+48;Itabuna;Bahia;BA
+49;Juazeiro;Bahia;BA
+50;Lauro de Freitas;Bahia;BA
+51;Taguatinga;Distrito Federal;DF
+52;Samambaia;Distrito Federal;DF
+53;Planaltina;Distrito Federal;DF
+54;Sobradinho;Distrito Federal;DF
+55;Gama;Distrito Federal;DF
+56;Maringá;Paraná;PR
+57;Ponta Grossa;Paraná;PR
+58;Cascavel;Paraná;PR
+59;Foz do Iguaçu;Paraná;PR
+60;Colombo;Paraná;PR
+61;Itacoatiara;Amazonas;AM
+62;Manacapuru;Amazonas;AM
+63;Coari;Amazonas;AM
+64;Tabatinga;Amazonas;AM
+65;Tefé;Amazonas;AM
+66;Serra;Espírito Santo;ES
+67;Cariacica;Espírito Santo;ES
+68;Viana;Espírito Santo;ES
+69;Linhares;Espírito Santo;ES
+70;Colatina;Espírito Santo;ES
+71;Anápolis;Goiás;GO
+72;Rio Verde;Goiás;GO
+73;Luziânia;Goiás;GO
+74;Águas Lindas de Goiás;Goiás;GO
+75;Valparaíso de Goiás;Goiás;GO
+76;Olinda;Pernambuco;PE
+77;Caruaru;Pernambuco;PE
+78;Petrolina;Pernambuco;PE
+79;Paulista;Pernambuco;PE
+80;Cabo de Santo Agostinho;Pernambuco;PE
+81;Ananindeua;Pará;PA
+82;Santarém;Pará;PA
+83;Marabá;Pará;PA
+84;Parauapebas;Pará;PA
+85;Castanhal;Pará;PA
+86;Pelotas;Rio Grande do Sul;RS
+87;Canoas;Rio Grande do Sul;RS
+88;Santa Maria;Rio Grande do Sul;RS
+89;Gravataí;Rio Grande do Sul;RS
+90;Viamão;Rio Grande do Sul;RS
+91;Blumenau;Santa Catarina;SC
+92;Chapecó;Santa Catarina;SC
+93;Itajaí;Santa Catarina;SC
+94;Criciúma;Santa Catarina;SC
+95;Jaraguá do Sul;Santa Catarina;SC
+96;Corumbá;Mato Grosso do Sul;MS
+97;Três Lagoas;Mato Grosso do Sul;MS
+98;Ponta Porã;Mato Grosso do Sul;MS
+99;Naviraí;Mato Grosso do Sul;MS
+100;Nova Andradina;Mato Grosso do Sul;MS
+101;Várzea Grande;Mato Grosso;MT
+102;Rondonópolis;Mato Grosso;MT
+103;Sinop;Mato Grosso;MT
+104;Tangará da Serra;Mato Grosso;MT
+105;Cáceres;Mato Grosso;MT 

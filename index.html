@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JN Madeiras - Espécies de Madeira</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+
+        body {
+            background-color: #f5f5f5;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 20px;
+            background-color: #2c1810;
+            color: white;
+            border-radius: 8px;
+            position: relative;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 15px;
+        }
+
+        .quote-button, .admin-button {
+            padding: 10px 20px;
+            border-radius: 4px;
+            text-decoration: none;
+            color: white;
+            font-weight: bold;
+            transition: background-color 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .quote-button {
+            background-color: #28a745;
+        }
+
+        .quote-button:hover {
+            background-color: #218838;
+        }
+
+        .admin-button {
+            background-color: #4a3228;
+        }
+
+        .admin-button:hover {
+            background-color: #5f422f;
+        }
+
+        .promo-section {
+            background: linear-gradient(135deg, #2c1810 0%, #4a3228 100%);
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            color: white;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .promo-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 50%;
+            height: 100%;
+            background: linear-gradient(
+                90deg,
+                transparent,
+                rgba(255, 255, 255, 0.2),
+                transparent
+            );
+            animation: shine 3s infinite;
+        }
+
+        @keyframes shine {
+            to {
+                left: 100%;
+            }
+        }
+
+        .promo-content {
+            font-size: 1.2em;
+            line-height: 1.6;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+            white-space: pre-line;
+        }
+
+        .wood-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .wood-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .wood-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .wood-name {
+            font-size: 1.2em;
+            color: #2c1810;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .wood-info {
+            color: #4a4a4a;
+            font-size: 1.1em;
+            margin-bottom: 5px;
+        }
+
+        .wood-price {
+            color: #4a4a4a;
+            font-size: 1.1em;
+            margin-top: 10px;
+            border-top: 1px solid #eee;
+            padding-top: 10px;
+        }
+
+        .price-value {
+            color: #2c1810;
+            font-weight: bold;
+        }
+
+        @media (max-width: 768px) {
+            .wood-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background-color: white;
+            padding: 30px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 400px;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+        }
+
+        .modal-content h2 {
+            color: #2c1810;
+            text-align: center;
+            margin-bottom: 25px;
+            font-size: 24px;
+            border-bottom: 2px solid #2c1810;
+            padding-bottom: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #2c1810;
+            font-weight: bold;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus {
+            border-color: #2c1810;
+            outline: none;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: flex-end;
+            margin-top: 25px;
+        }
+
+        .submit-button {
+            background-color: #2c1810;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            font-weight: bold;
+        }
+
+        .submit-button:hover {
+            background-color: #4a3228;
+        }
+
+        .cancel-button {
+            background-color: #6c757d;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            font-weight: bold;
+        }
+
+        .cancel-button:hover {
+            background-color: #5a6268;
+        }
+
+        .forgot-password {
+            text-align: center;
+            margin-top: 15px;
+        }
+
+        .forgot-password a {
+            color: #2c1810;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .forgot-password a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>JN Madeiras</h1>
+            <div class="header-buttons">
+                <a href="orcamento.html" class="quote-button">
+                    <i class="fas fa-calculator"></i> Solicitar Orçamento
+                </a>
+                <button onclick="showPasswordModal()" class="admin-button">
+                    <i class="fas fa-user-lock"></i> Área Administrativa
+                </button>
+            </div>
+        </div>
+
+        <div id="promoSection" class="promo-section" style="display: none;">
+            <div class="promo-content"></div>
+        </div>
+
+        <div class="wood-grid" id="woodGrid"></div>
+
+        <!-- Modal de Senha -->
+        <div id="passwordModal" class="modal">
+            <div class="modal-content">
+                <h2><i class="fas fa-lock"></i> Acesso Administrativo</h2>
+                <div class="form-group">
+                    <label for="senha">Digite sua senha:</label>
+                    <input type="password" id="senha" required placeholder="Digite a senha de acesso">
+                </div>
+                <div class="modal-buttons">
+                    <button onclick="submitPassword()" class="submit-button">
+                        <i class="fas fa-sign-in-alt"></i> Acessar
+                    </button>
+                    <button onclick="closePasswordModal()" class="cancel-button">
+                        <i class="fas fa-times"></i> Cancelar
+                    </button>
+                </div>
+                <div class="forgot-password">
+                    <a href="#" onclick="showForgotPasswordModal()">Esqueceu a senha?</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal de Recuperação de Senha -->
+        <div id="forgotPasswordModal" class="modal">
+            <div class="modal-content">
+                <h2><i class="fas fa-key"></i> Recuperar Senha</h2>
+                <div class="form-group">
+                    <label for="email">E-mail cadastrado:</label>
+                    <input type="email" id="email" required placeholder="Digite seu e-mail">
+                </div>
+                <div class="modal-buttons">
+                    <button onclick="recoverPassword()" class="submit-button">
+                        <i class="fas fa-paper-plane"></i> Enviar
+                    </button>
+                    <button onclick="closeForgotPasswordModal()" class="cancel-button">
+                        <i class="fas fa-times"></i> Cancelar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const woodData = [
+            { 
+                name: "Angelim Vermelho", 
+                price: 95000, 
+                visible: true,
+                quantidadeTora: 95.000,
+                porcentagem: 50,
+                quantidadeSerrada: 47.500
+            },
+            { name: "Angelim-Amargoso", price: 225.4383, visible: true },
+            { name: "Angelim-Pedra", price: 93.0246, visible: true },
+            { name: "Araracanga", price: 20.770, visible: true },
+            { name: "Cumaru Vermelho", price: 15.000, visible: true },
+            { name: "Fava-Orelha-de-Macaco", price: 117.888, visible: true },
+            { name: "Guariúba", price: 3.236, visible: true },
+            { name: "Jatobá", price: 134.928, visible: true },
+            { name: "Louro Tamaguare", price: 45.000, visible: true },
+            { name: "Mandioqueiro", price: 15.000, visible: true },
+            { name: "Maçaranduba", price: 16.054, visible: true },
+            { name: "Oiticica", price: 24.713, visible: true },
+            { name: "Orelha de Macaco", price: 21.502, visible: true },
+            { name: "Pequiá", price: 78.672, visible: true },
+            { name: "Quaruba-Cedro", price: 42.173, visible: true },
+            { name: "Quarubatinga", price: 80.629, visible: true },
+            { name: "Tanibuca", price: 62.714, visible: true },
+            { name: "Táxi", price: 75.000, visible: true },
+            { name: "Timborana", price: 35.000, visible: true }
+        ];
+
+        function formatNumber(number) {
+            return number.toLocaleString('pt-BR', {
+                minimumFractionDigits: 3,
+                maximumFractionDigits: 3
+            });
+        }
+
+        function formatCurrency(value) {
+            return new Intl.NumberFormat('pt-BR', {
+                style: 'currency',
+                currency: 'BRL',
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            }).format(value);
+        }
+
+        function createWoodCards() {
+            const woodGrid = document.getElementById('woodGrid');
+            woodGrid.innerHTML = '';
+            
+            const savedData = localStorage.getItem('woodData');
+            const currentData = savedData ? JSON.parse(savedData) : woodData;
+            
+            currentData.forEach(wood => {
+                if (wood.visible !== false) {
+                    const card = document.createElement('div');
+                    card.className = 'wood-card';
+                    
+                    card.innerHTML = `
+                        <div class="wood-name">${wood.name}</div>
+                        <div class="wood-info">Em Tora: ${formatNumber(wood.quantidadeTora)} m³</div>
+                        <div class="wood-info">Serrada: ${formatNumber(wood.quantidadeSerrada)} m³</div>
+                        <div class="wood-price">${formatCurrency(wood.price)}</div>
+                    `;
+                    
+                    woodGrid.appendChild(card);
+                }
+            });
+
+            // Carregar e exibir promoções
+            const promoText = localStorage.getItem('promoText');
+            const promoSection = document.getElementById('promoSection');
+            const promoContent = promoSection.querySelector('.promo-content');
+            
+            if (promoText && promoText.trim() !== '') {
+                promoContent.textContent = promoText;
+                promoSection.style.display = 'block';
+            } else {
+                promoSection.style.display = 'none';
+            }
+        }
+
+        function checkPassword() {
+            const senha = prompt('Digite a senha de acesso:');
+            if (senha === '123456') {
+                return true;
+            } else {
+                alert('Senha incorreta!');
+                return false;
+            }
+        }
+
+        function showPasswordModal() {
+            const modal = document.getElementById('passwordModal');
+            modal.style.display = 'block';
+        }
+
+        function closePasswordModal() {
+            const modal = document.getElementById('passwordModal');
+            modal.style.display = 'none';
+        }
+
+        function submitPassword() {
+            const senha = document.getElementById('senha').value;
+            if (senha === '20292029') {
+                window.location.href = 'editar.html';
+            } else {
+                alert('Senha incorreta!');
+            }
+        }
+
+        function showForgotPasswordModal() {
+            closePasswordModal();
+            const modal = document.getElementById('forgotPasswordModal');
+            modal.style.display = 'block';
+        }
+
+        function closeForgotPasswordModal() {
+            const modal = document.getElementById('forgotPasswordModal');
+            modal.style.display = 'none';
+        }
+
+        function recoverPassword() {
+            const email = document.getElementById('email').value;
+            if (email) {
+                alert('Um e-mail com instruções para recuperar sua senha foi enviado.');
+                closeForgotPasswordModal();
+            } else {
+                alert('Por favor, digite seu e-mail.');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', createWoodCards);
+    </script>
+</body>
+</html> 
