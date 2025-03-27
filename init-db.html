@@ -134,13 +134,27 @@
                 // Verificar conexão com o Firebase
                 console.log('Verificando conexão com o Firebase...');
                 const connectedRef = database.ref('.info/connected');
-                connectedRef.on('value', (snap) => {
-                    if (snap.val() === true) {
-                        console.log('Conectado ao Firebase!');
-                    } else {
-                        console.log('Desconectado do Firebase!');
-                    }
+                
+                // Criar uma Promise para verificar a conexão
+                const connectionPromise = new Promise((resolve, reject) => {
+                    const timeout = setTimeout(() => {
+                        reject(new Error('Timeout ao verificar conexão com o Firebase'));
+                    }, 5000);
+
+                    connectedRef.once('value', (snap) => {
+                        clearTimeout(timeout);
+                        if (snap.val() === true) {
+                            console.log('Conectado ao Firebase!');
+                            resolve(true);
+                        } else {
+                            console.log('Desconectado do Firebase!');
+                            reject(new Error('Não foi possível conectar ao Firebase'));
+                        }
+                    });
                 });
+
+                // Aguardar a conexão
+                await connectionPromise;
 
                 // Inicializar dados de madeira
                 console.log('Inicializando dados de madeira...');
