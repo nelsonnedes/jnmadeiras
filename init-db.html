@@ -54,7 +54,8 @@
             storageBucket: "comercial-5bc01.firebasestorage.app",
             messagingSenderId: "956944566020",
             appId: "1:956944566020:web:dc3e58cba5afcc6e9b7251",
-            measurementId: "G-RF6Y1FZBM9"
+            measurementId: "G-RF6Y1FZBM9",
+            databaseURL: "https://comercial-5bc01-default-rtdb.firebaseio.com"
         };
 
         // Inicializar Firebase
@@ -88,7 +89,35 @@
             name: "JN Madeiras",
             address: "Endereço da Empresa",
             phone: "(XX) XXXX-XXXX",
-            email: "contato@jnmadeiras.com.br"
+            email: "contato@jnmadeiras.com.br",
+            whatsapp: "(XX) XXXXX-XXXX",
+            instagram: "@jnmadeiras",
+            facebook: "JN Madeiras",
+            cnpj: "XX.XXX.XXX/XXXX-XX",
+            ie: "XXX.XXX.XXX"
+        };
+
+        // Estrutura para orçamentos
+        const defaultQuotes = {
+            lastId: 0,
+            quotes: []
+        };
+
+        // Estrutura para notificações
+        const defaultNotifications = {
+            lastId: 0,
+            notifications: []
+        };
+
+        // Estrutura para usuários
+        const defaultUsers = {
+            admin: {
+                username: "admin",
+                password: "admin123", // Em produção, usar hash
+                role: "admin",
+                name: "Administrador",
+                email: "admin@jnmadeiras.com.br"
+            }
         };
 
         function showStatus(message, isError = false) {
@@ -112,6 +141,18 @@
                 // Inicializar configurações da empresa
                 await database.ref('companySettings').set(defaultCompanySettings);
                 showStatus('Configurações da empresa inicializadas com sucesso!');
+
+                // Inicializar estrutura de orçamentos
+                await database.ref('quotes').set(defaultQuotes);
+                showStatus('Estrutura de orçamentos inicializada com sucesso!');
+
+                // Inicializar estrutura de notificações
+                await database.ref('notifications').set(defaultNotifications);
+                showStatus('Estrutura de notificações inicializada com sucesso!');
+
+                // Inicializar estrutura de usuários
+                await database.ref('users').set(defaultUsers);
+                showStatus('Estrutura de usuários inicializada com sucesso!');
 
                 showStatus('Banco de dados inicializado com sucesso!');
             } catch (error) {
