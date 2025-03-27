@@ -663,59 +663,65 @@
             }).format(value);
         }
 
-        function createWoodCards() {
-            const woodGrid = document.getElementById('woodGrid');
-            woodGrid.innerHTML = '';
-            
+        async function createWoodCards() {
             try {
-                let currentData = woodData; // Usar dados padrão por padrão
+                // Carregar dados do arquivo data.json
+                const response = await fetch('data.json');
+                const data = await response.json();
                 
-                // Tentar carregar do localStorage
-                try {
-                    const savedData = localStorage.getItem('woodData');
-                    if (savedData) {
-                        currentData = JSON.parse(savedData);
-                    }
-                } catch (e) {
-                    console.log('localStorage não disponível, usando dados padrão');
+                const woodData = data.woodData;
+                const promoText = data.promoText;
+                
+                // Ordenar por nome
+                woodData.sort((a, b) => a.name.localeCompare(b.name));
+                
+                // Atualizar seção de promoções
+                const promoSection = document.querySelector('.promo-section');
+                if (promoText && promoText.trim() !== '') {
+                    promoSection.innerHTML = `
+                        <div class="promo-content">
+                            <h3>Ofertas e Promoções</h3>
+                            <p>${promoText}</p>
+                        </div>
+                    `;
+                    promoSection.style.display = 'block';
+                } else {
+                    promoSection.style.display = 'none';
                 }
                 
-                // Ordenar os dados por nome
-                currentData.sort((a, b) => a.name.localeCompare(b.name));
+                // Criar cards
+                const woodGrid = document.querySelector('.wood-grid');
+                woodGrid.innerHTML = '';
                 
-                currentData.forEach(wood => {
-                    if (wood.visible !== false) {
+                woodData.forEach(wood => {
+                    if (wood.visible) {
                         const card = document.createElement('div');
                         card.className = 'wood-card';
-                        
-                        const quantidadeTora = wood.quantidadeTora || 0;
-                        const quantidadeSerrada = wood.quantidadeSerrada || 0;
-                        const price = wood.price || 0;
-                        
                         card.innerHTML = `
-                            <div class="wood-name">${wood.name}</div>
-                            <div class="stock-info">
-                                <div class="stock-item">
-                                    <div class="stock-label">Em Tora</div>
-                                    <div class="stock-value">${formatNumber(quantidadeTora)} m³</div>
-                                </div>
-                                <div class="stock-separator"></div>
-                                <div class="stock-item">
-                                    <div class="stock-label">Serrada</div>
-                                    <div class="stock-value">${formatNumber(quantidadeSerrada)} m³</div>
-                                </div>
+                            <h3>${wood.name}</h3>
+                            <div class="wood-info">
+                                <p><strong>Quantidade em Tora:</strong> ${formatNumber(wood.quantidadeTora || 0)}</p>
+                                <p><strong>Rendimento:</strong> ${wood.porcentagem || 50}%</p>
+                                <p><strong>Quantidade Serrada:</strong> ${formatNumber(wood.quantidadeSerrada || 0)}</p>
+                                <p class="wood-price"><strong>Preço:</strong> ${formatCurrency(wood.price)}</p>
                             </div>
-                            <div class="price-info">
-                                <div class="price-label">Preço por m³</div>
-                                <div class="price-value">${formatCurrency(price)}</div>
+                            <div class="stock-info">
+                                <p><strong>Estoque:</strong> ${wood.quantidadeSerrada ? 'Disponível' : 'Sob consulta'}</p>
                             </div>
                         `;
                         woodGrid.appendChild(card);
                     }
                 });
             } catch (error) {
-                console.error('Erro ao criar cards:', error);
-                woodGrid.innerHTML = '<div class="error-message">Erro ao carregar os dados. Por favor, recarregue a página.</div>';
+                console.error('Erro ao carregar dados:', error);
+                // Em caso de erro, mostrar uma mensagem amigável
+                const woodGrid = document.querySelector('.wood-grid');
+                woodGrid.innerHTML = `
+                    <div class="error-message">
+                        <p>Desculpe, não foi possível carregar os dados dos produtos.</p>
+                        <p>Por favor, tente novamente mais tarde.</p>
+                    </div>
+                `;
             }
         }
 

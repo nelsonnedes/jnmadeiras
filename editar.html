@@ -1068,49 +1068,24 @@
             return parseFloat(value.replace(/[^\d,.-]/g, '').replace(',', '.'));
         }
 
-        function loadWoodData() {
-            const savedData = localStorage.getItem('woodData');
-            const savedPromo = localStorage.getItem('promoText');
-            
-            if (savedData) {
-                woodData = JSON.parse(savedData);
-            } else {
-                woodData = [
-                    { 
-                        name: "Angelim Vermelho", 
-                        price: 95000, 
-                        visible: true,
-                        quantidadeTora: 95.000,
-                        porcentagem: 50,
-                        quantidadeSerrada: 47.500
-                    },
-                    { name: "Angelim-Amargoso", price: 225.4383, visible: true },
-                    { name: "Angelim-Pedra", price: 93.0246, visible: true },
-                    { name: "Araracanga", price: 20.770, visible: true },
-                    { name: "Cumaru Vermelho", price: 15.000, visible: true },
-                    { name: "Fava-Orelha-de-Macaco", price: 117.888, visible: true },
-                    { name: "Guariúba", price: 3.236, visible: true },
-                    { name: "Jatobá", price: 134.928, visible: true },
-                    { name: "Louro Tamaguare", price: 45.000, visible: true },
-                    { name: "Mandioqueiro", price: 15.000, visible: true },
-                    { name: "Maçaranduba", price: 16.054, visible: true },
-                    { name: "Oiticica", price: 24.713, visible: true },
-                    { name: "Orelha de Macaco", price: 21.502, visible: true },
-                    { name: "Pequiá", price: 78.672, visible: true },
-                    { name: "Quaruba-Cedro", price: 42.173, visible: true },
-                    { name: "Quarubatinga", price: 80.629, visible: true },
-                    { name: "Tanibuca", price: 62.714, visible: true },
-                    { name: "Táxi", price: 75.000, visible: true },
-                    { name: "Timborana", price: 35.000, visible: true }
-                ];
-            }
-
-            if (savedPromo) {
-                promoText = savedPromo;
+        async function loadWoodData() {
+            try {
+                // Carregar dados do arquivo data.json
+                const response = await fetch('data.json');
+                const data = await response.json();
+                
+                woodData = data.woodData;
+                promoText = data.promoText;
+                
+                // Atualizar o campo de promoções
                 document.getElementById('promoText').value = promoText;
+                
+                // Renderizar a tabela
+                renderTable();
+            } catch (error) {
+                console.error('Erro ao carregar dados:', error);
+                alert('Erro ao carregar os dados. Por favor, recarregue a página.');
             }
-
-            renderTable();
         }
 
         function calculateSerrada(tora, porcentagem) {
@@ -1212,18 +1187,51 @@
                 porcentagem: 50,
                 quantidadeSerrada: 0
             });
+            
             renderTable();
         }
 
         function updatePromoText(value) {
             promoText = value;
-            localStorage.setItem('promoText', value);
         }
 
-        function salvarAlteracoes() {
-            localStorage.setItem('woodData', JSON.stringify(woodData));
-            localStorage.setItem('promoText', promoText);
-            alert('Alterações salvas com sucesso!');
+        async function salvarAlteracoes() {
+            try {
+                // Garantir que todos os dados necessários estejam presentes
+                const woodDataToSave = woodData.map(wood => ({
+                    name: wood.name,
+                    price: wood.price,
+                    visible: wood.visible,
+                    quantidadeTora: wood.quantidadeTora || 0,
+                    porcentagem: wood.porcentagem || 50,
+                    quantidadeSerrada: wood.quantidadeSerrada || 0
+                }));
+
+                // Criar o objeto com os dados atualizados
+                const dataToSave = {
+                    woodData: woodDataToSave,
+                    promoText: promoText
+                };
+
+                // Salvar no arquivo data.json
+                const response = await fetch('data.json', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(dataToSave)
+                });
+
+                if (!response.ok) {
+                    throw new Error('Erro ao salvar os dados');
+                }
+
+                alert('Alterações salvas com sucesso!');
+                window.location.reload();
+            } catch (error) {
+                console.error('Erro ao salvar alterações:', error);
+                alert('Erro ao salvar as alterações. Por favor, tente novamente.');
+            }
         }
 
         // Funções do Menu Lateral
