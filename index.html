@@ -78,9 +78,28 @@
             border-radius: 8px;
             margin-bottom: 20px;
             color: white;
-            text-align: center;
-            position: relative;
+            width: 100%;
+            box-sizing: border-box;
             overflow: hidden;
+        }
+
+        .promo-section textarea {
+            width: 100%;
+            min-height: 100px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-top: 10px;
+            font-size: 1em;
+            resize: vertical;
+            box-sizing: border-box;
+        }
+
+        .promo-section label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #fff;
         }
 
         .promo-section::before {
@@ -120,45 +139,133 @@
 
         .wood-card {
             background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            transition: transform 0.3s ease;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            border: 1px solid #eee;
+            position: relative;
+            overflow: hidden;
         }
 
         .wood-card:hover {
             transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+
+        .wood-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, #2c1810, #4a3228);
         }
 
         .wood-name {
-            font-size: 1.2em;
+            font-size: 1.4em;
             color: #2c1810;
-            margin-bottom: 10px;
+            margin-bottom: 15px;
             font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .wood-name::before {
+            content: '🌳';
+            font-size: 1.2em;
         }
 
         .wood-info {
             color: #4a4a4a;
             font-size: 1.1em;
-            margin-bottom: 5px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .wood-info::before {
+            content: '📊';
+            font-size: 1.1em;
         }
 
         .wood-price {
-            color: #4a4a4a;
-            font-size: 1.1em;
-            margin-top: 10px;
-            border-top: 1px solid #eee;
-            padding-top: 10px;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 2px solid #f0f0f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .price-label {
+            color: #666;
+            font-size: 0.9em;
         }
 
         .price-value {
             color: #2c1810;
             font-weight: bold;
+            font-size: 1.3em;
+            background: #f8f8f8;
+            padding: 8px 15px;
+            border-radius: 6px;
+        }
+
+        .stock-info {
+            display: flex;
+            gap: 15px;
+            margin: 10px 0;
+            padding: 10px;
+            background: #f8f8f8;
+            border-radius: 6px;
+        }
+
+        .stock-item {
+            flex: 1;
+            text-align: center;
+        }
+
+        .stock-label {
+            font-size: 0.9em;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .stock-value {
+            font-size: 1.1em;
+            color: #2c1810;
+            font-weight: bold;
+        }
+
+        .stock-separator {
+            width: 1px;
+            background: #ddd;
+            margin: 0 10px;
         }
 
         @media (max-width: 768px) {
             .wood-grid {
                 grid-template-columns: 1fr;
+            }
+        }
+
+        @media screen and (max-width: 768px) {
+            .promo-section {
+                margin: 10px;
+                padding: 15px;
+            }
+
+            .promo-section textarea {
+                min-height: 80px;
+                font-size: 0.9em;
+            }
+
+            .container {
+                padding: 10px;
             }
         }
 
@@ -386,16 +493,13 @@
             woodGrid.innerHTML = '';
             
             try {
-                // Tentar carregar dados do localStorage
                 const savedData = localStorage.getItem('woodData');
                 let currentData;
                 
                 if (savedData) {
                     currentData = JSON.parse(savedData);
                 } else {
-                    // Se não houver dados no localStorage, usar os dados padrão
                     currentData = woodData;
-                    // Salvar os dados padrão no localStorage
                     localStorage.setItem('woodData', JSON.stringify(woodData));
                 }
                 
@@ -404,23 +508,33 @@
                         const card = document.createElement('div');
                         card.className = 'wood-card';
                         
-                        // Verificar se as propriedades existem antes de usar
                         const quantidadeTora = wood.quantidadeTora || 0;
                         const quantidadeSerrada = wood.quantidadeSerrada || 0;
                         const price = wood.price || 0;
                         
                         card.innerHTML = `
                             <div class="wood-name">${wood.name}</div>
-                            <div class="wood-info">Em Tora: ${formatNumber(quantidadeTora)} m³</div>
-                            <div class="wood-info">Serrada: ${formatNumber(quantidadeSerrada)} m³</div>
-                            <div class="wood-price">${formatCurrency(price)}</div>
+                            <div class="stock-info">
+                                <div class="stock-item">
+                                    <div class="stock-label">Em Tora</div>
+                                    <div class="stock-value">${formatNumber(quantidadeTora)} m³</div>
+                                </div>
+                                <div class="stock-separator"></div>
+                                <div class="stock-item">
+                                    <div class="stock-label">Serrada</div>
+                                    <div class="stock-value">${formatNumber(quantidadeSerrada)} m³</div>
+                                </div>
+                            </div>
+                            <div class="wood-price">
+                                <span class="price-label">Preço por m³:</span>
+                                <span class="price-value">${formatCurrency(price)}</span>
+                            </div>
                         `;
                         
                         woodGrid.appendChild(card);
                     }
                 });
 
-                // Carregar e exibir promoções
                 const promoText = localStorage.getItem('promoText');
                 const promoSection = document.getElementById('promoSection');
                 const promoContent = promoSection.querySelector('.promo-content');
@@ -433,7 +547,6 @@
                 }
             } catch (error) {
                 console.error('Erro ao criar cards de madeira:', error);
-                // Em caso de erro, mostrar uma mensagem amigável
                 woodGrid.innerHTML = '<div class="error-message">Erro ao carregar os dados. Por favor, recarregue a página.</div>';
             }
         }
@@ -491,12 +604,25 @@
         // Inicializar quando o documento estiver pronto
         document.addEventListener('DOMContentLoaded', function() {
             console.log('DOM carregado, iniciando...');
-            initializeData();
-            createWoodCards();
-            loadCompanyLogo();
-            loadQuotes();
-            updateNotificationCount();
-            setInterval(updateNotificationCount, 60000);
+            try {
+                // Inicializar dados primeiro
+                initializeData();
+                
+                // Depois criar os cards
+                createWoodCards();
+                
+                // Carregar logo e outras configurações
+                loadCompanyLogo();
+                loadQuotes();
+                updateNotificationCount();
+                
+                // Configurar atualização periódica
+                setInterval(updateNotificationCount, 60000);
+                
+                console.log('Inicialização concluída com sucesso');
+            } catch (error) {
+                console.error('Erro durante a inicialização:', error);
+            }
         });
 
         function initializeData() {
@@ -535,6 +661,7 @@
                         { name: "Táxi", price: 75.000, visible: true, quantidadeTora: 0, quantidadeSerrada: 0 },
                         { name: "Timborana", price: 35.000, visible: true, quantidadeTora: 0, quantidadeSerrada: 0 }
                     ]));
+                    console.log('Dados de madeiras inicializados com sucesso');
                 }
 
                 if (!companySettings) {
@@ -548,13 +675,12 @@
                         email: 'contato@jnmadeiras.com',
                         logo: 'Logo JN.png'
                     }));
+                    console.log('Configurações da empresa inicializadas com sucesso');
                 }
             } catch (error) {
                 console.error('Erro ao inicializar dados:', error);
             }
         }
-
-        document.addEventListener('DOMContentLoaded', createWoodCards);
     </script>
 </body>
 </html> 
