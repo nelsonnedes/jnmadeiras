@@ -673,9 +673,11 @@
                 
                 if (savedData) {
                     currentData = JSON.parse(savedData);
+                    console.log('Dados carregados do localStorage:', currentData);
                 } else {
                     currentData = woodData;
                     localStorage.setItem('woodData', JSON.stringify(woodData));
+                    console.log('Usando dados padrão:', currentData);
                 }
                 
                 currentData.forEach(wood => {
@@ -700,30 +702,29 @@
                                     <div class="stock-value">${formatNumber(quantidadeSerrada)} m³</div>
                                 </div>
                             </div>
-                            <div class="wood-price">
-                                <span class="price-label">Preço por m³:</span>
-                                <span class="price-value">${formatCurrency(price)}</span>
+                            <div class="price-info">
+                                <div class="price-label">Preço por m³</div>
+                                <div class="price-value">${formatCurrency(price)}</div>
                             </div>
                         `;
-                        
                         woodGrid.appendChild(card);
                     }
                 });
-
-                const promoText = localStorage.getItem('promoText');
-                const promoSection = document.getElementById('promoSection');
-                const promoContent = promoSection.querySelector('.promo-content');
                 
-                if (promoText && promoText.trim() !== '') {
-                    promoContent.textContent = promoText;
-                    promoSection.style.display = 'block';
-                } else {
-                    promoSection.style.display = 'none';
-                }
+                console.log('Cards criados com sucesso');
             } catch (error) {
-                console.error('Erro ao criar cards de madeira:', error);
+                console.error('Erro ao criar cards:', error);
                 woodGrid.innerHTML = '<div class="error-message">Erro ao carregar os dados. Por favor, recarregue a página.</div>';
             }
+        }
+
+        // Função para atualizar os cards periodicamente
+        function startPeriodicUpdate() {
+            // Atualizar a cada 5 segundos
+            setInterval(() => {
+                console.log('Verificando atualizações...');
+                createWoodCards();
+            }, 5000);
         }
 
         function checkPassword() {
@@ -791,7 +792,10 @@
                 loadQuotes();
                 updateNotificationCount();
                 
-                // Configurar atualização periódica
+                // Iniciar atualização periódica
+                startPeriodicUpdate();
+                
+                // Configurar atualização de notificações
                 setInterval(updateNotificationCount, 60000);
                 
                 console.log('Inicialização concluída com sucesso');
