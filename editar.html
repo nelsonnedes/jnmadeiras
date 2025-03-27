@@ -314,6 +314,7 @@
             max-height: 90vh;
             display: flex;
             flex-direction: column;
+            overflow: hidden;
         }
 
         .modal-header {
@@ -489,6 +490,28 @@
 
         .company-settings {
             padding: 20px;
+            max-height: calc(90vh - 150px);
+            overflow-y: auto;
+            margin: -20px;
+            padding-right: 40px;
+        }
+
+        .company-settings::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .company-settings::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+
+        .company-settings::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 4px;
+        }
+
+        .company-settings::-webkit-scrollbar-thumb:hover {
+            background: #555;
         }
 
         .company-settings .form-group {
@@ -610,6 +633,180 @@
             background-color: #c82333;
             transform: translateY(-2px);
         }
+
+        #companySettingsForm {
+            overflow-y: auto;
+            max-height: calc(90vh - 150px);
+            padding-right: 10px;
+        }
+
+        #companySettingsForm::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        #companySettingsForm::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+
+        #companySettingsForm::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 4px;
+        }
+
+        #companySettingsForm::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+
+        @media screen and (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+
+            .header {
+                padding: 15px;
+            }
+
+            .header h1 {
+                font-size: 1.8em;
+            }
+
+            .header-buttons {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .quote-button, .admin-button {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .modal-content {
+                width: 95%;
+                padding: 15px;
+                margin: 20px auto;
+            }
+
+            .form-group {
+                margin-bottom: 15px;
+            }
+
+            .form-group input,
+            .form-group textarea,
+            .form-group select {
+                padding: 8px;
+                font-size: 14px;
+            }
+
+            .modal-buttons {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .submit-button,
+            .cancel-button {
+                width: 100%;
+            }
+
+            .species-grid {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+
+            .species-item {
+                padding: 10px;
+            }
+
+            .species-item label {
+                font-size: 14px;
+            }
+
+            .species-item .price {
+                font-size: 14px;
+            }
+
+            .notification-badge {
+                right: 5px;
+                top: 5px;
+                font-size: 12px;
+                padding: 2px 6px;
+            }
+
+            .quote-card {
+                padding: 15px;
+            }
+
+            .quote-header {
+                flex-direction: column;
+                gap: 5px;
+            }
+
+            .quote-info {
+                flex-direction: column;
+                gap: 5px;
+            }
+
+            .quote-actions {
+                flex-direction: column;
+                gap: 5px;
+            }
+
+            .quote-actions button {
+                width: 100%;
+            }
+
+            .company-settings {
+                padding: 15px;
+            }
+
+            .company-settings textarea {
+                min-height: 80px;
+                font-size: 14px;
+            }
+
+            .company-logo-preview {
+                max-width: 150px;
+            }
+
+            #companySettingsForm {
+                max-height: calc(90vh - 100px);
+            }
+        }
+
+        @media screen and (max-width: 480px) {
+            .header h1 {
+                font-size: 1.5em;
+            }
+
+            .modal-content {
+                padding: 10px;
+            }
+
+            .form-group label {
+                font-size: 14px;
+            }
+
+            .species-item {
+                padding: 8px;
+            }
+
+            .quote-card {
+                padding: 10px;
+            }
+
+            .quote-header h3 {
+                font-size: 16px;
+            }
+
+            .quote-info span {
+                font-size: 12px;
+            }
+
+            .quote-actions button {
+                font-size: 12px;
+                padding: 8px 15px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -682,34 +879,41 @@
     <!-- Modal de Configurações da Empresa -->
     <div class="modal" id="companySettingsModal">
         <div class="modal-content">
-            <button class="close-modal" onclick="closeModal('companySettingsModal')">&times;</button>
-            <h2>Configurações da Empresa</h2>
-            <div class="company-settings">
-                <form id="companySettingsForm" onsubmit="saveCompanySettings(event)">
-                    <div class="form-group">
-                        <label for="companyLogo">Logo da Empresa:</label>
-                        <input type="file" id="companyLogo" accept="image/*" onchange="previewLogo(event)">
-                        <img id="logoPreview" class="company-logo-preview" style="display: none;">
-                    </div>
-                    <div class="form-group">
-                        <label for="companyName">Nome da Empresa:</label>
-                        <input type="text" id="companyName" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="companyAddress">Endereço:</label>
-                        <textarea id="companyAddress" required></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label for="companyPhone">Telefone:</label>
-                        <input type="tel" id="companyPhone" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="companyEmail">E-mail:</label>
-                        <input type="email" id="companyEmail" required>
-                    </div>
-                    <button type="submit" class="action-button">Salvar Configurações</button>
-                </form>
+            <div class="modal-header">
+                <h2><i class="fas fa-building"></i> Configurações da Empresa</h2>
+                <button class="close-modal" onclick="closeModal('companySettingsModal')">&times;</button>
             </div>
+            <form id="companySettingsForm" onsubmit="saveCompanySettings(event)">
+                <div class="form-group">
+                    <label for="companyLogo">Logo da Empresa:</label>
+                    <input type="file" id="companyLogo" accept="image/*" onchange="previewLogo(event)">
+                    <img id="logoPreview" class="company-logo-preview" style="display: none;">
+                </div>
+                <div class="form-group">
+                    <label for="companyName">Nome da Empresa:</label>
+                    <input type="text" id="companyName" required>
+                </div>
+                <div class="form-group">
+                    <label for="companyAddress">Endereço:</label>
+                    <textarea id="companyAddress" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="companyPhone">Telefone:</label>
+                    <input type="tel" id="companyPhone" required>
+                </div>
+                <div class="form-group">
+                    <label for="companyEmail">E-mail:</label>
+                    <input type="email" id="companyEmail" required>
+                </div>
+                <div class="modal-buttons">
+                    <button type="submit" class="submit-button">
+                        <i class="fas fa-save"></i> Salvar Configurações
+                    </button>
+                    <button type="button" class="cancel-button" onclick="closeModal('companySettingsModal')">
+                        <i class="fas fa-times"></i> Cancelar
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 
@@ -788,7 +992,7 @@
                 <h2><i class="fas fa-edit"></i> Editar Orçamento</h2>
                 <button class="close-modal" onclick="closeModal('editQuoteModal')">&times;</button>
             </div>
-            <form id="editQuoteForm" onsubmit="saveChanges()">
+            <form id="editQuoteForm" onsubmit="saveChanges(event)">
                 <div class="form-group">
                     <label for="editNome">Nome do Cliente:</label>
                     <input type="text" id="editNome" required>
@@ -1200,27 +1404,43 @@
             // Preencher as espécies
             const especiesDiv = document.getElementById('editEspecies');
             especiesDiv.innerHTML = '';
-            quote.especies.forEach(especie => {
-                const checkbox = document.createElement('input');
-                checkbox.type = 'checkbox';
-                checkbox.value = especie;
-                checkbox.checked = true;
-                checkbox.id = `edit_${especie}`;
-                
-                const label = document.createElement('label');
-                label.htmlFor = `edit_${especie}`;
-                label.textContent = especie;
-                
+            
+            // Criar um mapa de espécies selecionadas para fácil acesso
+            const selectedSpeciesMap = new Map(
+                quote.especies.map(species => {
+                    const [name, price] = species.split(' - ');
+                    return [name, price];
+                })
+            );
+            
+            // Exibir apenas as espécies selecionadas
+            selectedSpeciesMap.forEach((price, name) => {
                 const div = document.createElement('div');
-                div.appendChild(checkbox);
-                div.appendChild(label);
+                div.className = 'species-item';
+                
+                div.innerHTML = `
+                    <input type="checkbox" 
+                           name="editSpecies" 
+                           value="${name}"
+                           id="edit_${name}"
+                           checked
+                           onchange="updateEditSpeciesSelection(this)">
+                    <label for="edit_${name}">
+                        ${name}
+                        <span class="price">${price}</span>
+                    </label>
+                `;
                 especiesDiv.appendChild(div);
             });
+
+            // Armazenar o ID do orçamento para referência
+            document.getElementById('editQuoteForm').dataset.orcamentoId = quote.id;
 
             showModal('editQuoteModal');
         }
 
-        function saveChanges() {
+        function saveChanges(event) {
+            event.preventDefault();
             const form = document.getElementById('editQuoteForm');
             const orcamentoId = form.dataset.orcamentoId;
             
@@ -1245,6 +1465,7 @@
                     especies: selectedSpecies,
                     pedido: form.querySelector('#editPedido').value,
                     observacoes: form.querySelector('#editObservacoes').value,
+                    contraProposta: form.querySelector('#editContraProposta').value,
                     data: new Date().toISOString()
                 };
                 
@@ -1252,101 +1473,150 @@
                 alert('Orçamento atualizado com sucesso!');
                 closeModal('editQuoteModal');
                 loadQuotes();
+            } else {
+                alert('Erro ao encontrar o orçamento para atualização.');
             }
         }
 
         function generateAndSendPDF(event) {
-            if (event) {
-                event.preventDefault();
-            }
+            event.preventDefault();
             
             try {
-                const quotes = JSON.parse(localStorage.getItem('orcamentos') || '[]');
-                const quote = quotes[currentEditingQuoteIndex];
-                const settings = JSON.parse(localStorage.getItem('companySettings') || '{}');
-                
-                // Criar uma nova instância do jsPDF
                 const { jsPDF } = window.jspdf;
                 const doc = new jsPDF();
                 
-                // Adicionar logo da empresa (se existir)
+                // Configurar fonte e tamanho
+                doc.setFontSize(12);
+                
+                // Adicionar logo da empresa
+                const settings = JSON.parse(localStorage.getItem('companySettings') || '{}');
                 if (settings.logo) {
-                    const img = new Image();
-                    img.src = settings.logo;
-                    doc.addImage(img, 'PNG', 20, 20, 40, 40);
+                    doc.addImage(settings.logo, 'PNG', 10, 10, 30, 30);
                 }
                 
-                // Informações da Empresa (alinhadas à direita)
-                doc.setFontSize(14);
-                doc.text(settings.name || 'JN MADEIRAS', 170, 25, { align: 'right' });
+                // Informações da empresa (alinhadas à direita da logo)
+                doc.setFontSize(16);
+                doc.setFont(undefined, 'bold');
+                doc.text(settings.name || 'JN MADEIRAS', 50, 20);
                 doc.setFontSize(12);
-                doc.text(settings.address || 'TRAVESSA DOMINGOS MIRANDA CARNEIRO', 170, 40, { align: 'right' });
-                doc.text(settings.phone || '91991311049', 170, 55, { align: 'right' });
-                doc.text(settings.email || 'jnmadeirasm@hotmail.com', 170, 70, { align: 'right' });
+                doc.setFont(undefined, 'normal');
+                doc.text(settings.address || 'TRAVESSA DOMINGOS MIRANDA CARNEIRO', 50, 30);
+                doc.text(settings.phone || '(91) 9 9131-1049', 50, 40);
+                doc.text(settings.email || 'jnmadeirasm@hotmail.com', 50, 50);
                 
-                // Título do Orçamento
+                // Linha separadora
+                doc.setDrawColor(200, 200, 200);
+                doc.setLineWidth(0.5);
+                doc.line(10, 60, 200, 60);
+                
+                // Título centralizado
                 doc.setFontSize(20);
-                doc.text('Orçamento', 105, 90, { align: 'center' });
+                doc.setFont(undefined, 'bold');
+                doc.text('Orçamento', 105, 75, { align: 'center' });
                 
-                // Informações do Cliente
-                doc.setFontSize(14);
-                doc.text('Dados do Cliente', 20, 100);
-                doc.setFontSize(12);
-                doc.text(`Nome: ${quote.nome}`, 20, 110);
-                doc.text(`Telefone: ${quote.telefone}`, 20, 120);
-                doc.text(`Localização: ${quote.cidade}/${quote.estado}`, 20, 130);
+                // Data do orçamento
+                doc.setFontSize(10);
+                doc.setFont(undefined, 'normal');
+                const data = new Date().toLocaleDateString('pt-BR');
+                doc.text(`Data: ${data}`, 190, 75, { align: 'right' });
                 
-                // Espécies de Interesse
-                doc.setFontSize(14);
-                doc.text('Espécies de Interesse', 20, 150);
+                // Linha separadora
+                doc.setDrawColor(200, 200, 200);
+                doc.setLineWidth(0.5);
+                doc.line(10, 80, 200, 80);
+                
+                // Dados do cliente
                 doc.setFontSize(12);
-                let y = 160;
-                quote.especies.forEach(especie => {
-                    doc.text(`• ${especie}`, 20, y);
+                doc.setFont(undefined, 'bold');
+                doc.text('Dados do Cliente:', 20, 95);
+                doc.setFontSize(10);
+                doc.setFont(undefined, 'normal');
+                doc.text(`Nome: ${document.getElementById('editNome').value}`, 20, 105);
+                doc.text(`Telefone: ${document.getElementById('editTelefone').value}`, 20, 115);
+                doc.text(`Estado: ${document.getElementById('editEstado').value}`, 20, 125);
+                doc.text(`Cidade: ${document.getElementById('editCidade').value}`, 20, 135);
+                
+                // Detalhes do pedido
+                doc.setFontSize(12);
+                doc.setFont(undefined, 'bold');
+                doc.text('Detalhes do Pedido:', 20, 155);
+                doc.setFontSize(10);
+                doc.setFont(undefined, 'normal');
+                doc.text(`Pedido: ${document.getElementById('editPedido').value}`, 20, 165);
+                
+                // Espécies selecionadas
+                doc.setFontSize(12);
+                doc.setFont(undefined, 'bold');
+                doc.text('Espécies Selecionadas:', 20, 185);
+                doc.setFontSize(10);
+                doc.setFont(undefined, 'normal');
+                let y = 195;
+                const selectedSpecies = Array.from(document.querySelectorAll('#editQuoteForm input[name="editSpecies"]:checked'))
+                    .map(cb => {
+                        const price = cb.parentElement.querySelector('.price').textContent;
+                        return `${cb.value} - ${price}`;
+                    });
+                selectedSpecies.forEach(species => {
+                    doc.text(species, 20, y);
                     y += 10;
                 });
                 
-                // Detalhes do Pedido
-                doc.setFontSize(14);
-                doc.text('Detalhes do Pedido', 20, y + 10);
-                doc.setFontSize(12);
-                const pedidoLines = doc.splitTextToSize(quote.pedido, 170);
-                doc.text(pedidoLines, 20, y + 20);
-                
                 // Contra Proposta
-                if (quote.contraProposta) {
-                    doc.setFontSize(14);
-                    doc.text('Contra Proposta', 20, y + 40);
+                const contraProposta = document.getElementById('editContraProposta').value;
+                if (contraProposta && contraProposta.trim() !== '') {
                     doc.setFontSize(12);
-                    const contraPropostaLines = doc.splitTextToSize(quote.contraProposta, 170);
-                    doc.text(contraPropostaLines, 20, y + 50);
+                    doc.setFont(undefined, 'bold');
+                    doc.text('Contra Proposta:', 20, y + 10);
+                    doc.setFontSize(10);
+                    doc.setFont(undefined, 'normal');
+                    doc.text(contraProposta, 20, y + 20);
+                    y += 30;
                 }
                 
-                // Data do Orçamento
-                const data = new Date().toLocaleDateString('pt-BR');
-                doc.setFontSize(10);
-                doc.text(`Data: ${data}`, 20, 280);
+                // Observações
+                const observacoes = document.getElementById('editObservacoes').value;
+                if (observacoes && observacoes.trim() !== '') {
+                    doc.setFontSize(12);
+                    doc.setFont(undefined, 'bold');
+                    doc.text('Observações:', 20, y + 10);
+                    doc.setFontSize(10);
+                    doc.setFont(undefined, 'normal');
+                    doc.text(observacoes, 20, y + 20);
+                }
+                
+                // Rodapé
+                doc.setDrawColor(200, 200, 200);
+                doc.setLineWidth(0.5);
+                doc.line(10, 280, 200, 280);
+                doc.setFontSize(8);
+                doc.text('Este orçamento tem validade de 30 dias a partir da data de emissão.', 105, 290, { align: 'center' });
                 
                 // Salvar o PDF
-                doc.save(`orcamento_${quote.nome.replace(/\s+/g, '_')}.pdf`);
+                doc.save('orcamento.pdf');
                 
-                // Abrir WhatsApp com o PDF
-                const phone = quote.telefone.replace(/\D/g, '');
-                const message = encodeURIComponent(`Olá ${quote.nome}, segue nossa contra proposta para seu orçamento.`);
+                // Abrir WhatsApp com mensagem predefinida
+                const message = encodeURIComponent(`Olá ${document.getElementById('editNome').value}! Segue o orçamento solicitado.`);
+                window.open(`https://wa.me/${document.getElementById('editTelefone').value.replace(/\D/g, '')}?text=${message}`, '_blank');
                 
-                // Atualizar status
-                quotes[currentEditingQuoteIndex].status = 'Respondido';
-                localStorage.setItem('orcamentos', JSON.stringify(quotes));
-                loadQuotes();
+                // Atualizar status do orçamento
+                const orcamentoId = document.getElementById('editQuoteForm').dataset.orcamentoId;
+                let orcamentos = JSON.parse(localStorage.getItem('orcamentos') || '[]');
+                const index = orcamentos.findIndex(o => o.id === orcamentoId);
+                
+                if (index !== -1) {
+                    orcamentos[index].status = 'Respondido';
+                    localStorage.setItem('orcamentos', JSON.stringify(orcamentos));
+                }
                 
                 // Fechar o modal
                 closeModal('editQuoteModal');
                 
-                // Abrir WhatsApp
-                window.open(`https://wa.me/55${phone}?text=${message}`, '_blank');
+                // Atualizar a lista de orçamentos
+                loadQuotes();
+                
             } catch (error) {
                 console.error('Erro ao gerar PDF:', error);
-                alert('Ocorreu um erro ao gerar o PDF. Por favor, tente novamente.');
+                alert('Erro ao gerar o PDF. Por favor, tente novamente.');
             }
         }
 
@@ -1464,6 +1734,7 @@
             form.querySelector('#editCidade').value = orcamento.cidade;
             form.querySelector('#editPedido').value = orcamento.pedido;
             form.querySelector('#editObservacoes').value = orcamento.observacoes || '';
+            form.querySelector('#editContraProposta').value = orcamento.contraProposta || '';
             
             // Preencher as espécies selecionadas
             const speciesGrid = form.querySelector('#editEspecies');
