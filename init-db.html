@@ -54,16 +54,45 @@
             max-height: 300px;
             overflow-y: auto;
         }
+        .login-form {
+            max-width: 400px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .hidden {
+            display: none;
+        }
     </style>
 </head>
 <body>
-    <h1>Inicializar Banco de Dados</h1>
-    <div>
-        <button onclick="initializeDatabase()">Inicializar Banco de Dados</button>
-        <button class="btn-danger" onclick="clearDatabase()">Limpar Banco de Dados</button>
+    <div id="loginSection" class="login-form">
+        <h2>Login Administrativo</h2>
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="email">E-mail:</label>
+                <input type="email" id="email" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Senha:</label>
+                <input type="password" id="password" required>
+            </div>
+            <button type="submit" class="btn">Entrar</button>
+        </form>
     </div>
-    <div id="status" class="status"></div>
-    <div id="console" class="console"></div>
+
+    <div id="adminSection" class="hidden">
+        <h1>Inicializar Banco de Dados</h1>
+        <div>
+            <button onclick="initializeDatabase()">Inicializar Banco de Dados</button>
+            <button class="btn-danger" onclick="clearDatabase()">Limpar Banco de Dados</button>
+            <button class="btn-danger" onclick="logout()">Sair</button>
+        </div>
+        <div id="status" class="status"></div>
+        <div id="console" class="console"></div>
+    </div>
 
     <script>
         // Configuração do Firebase
@@ -81,6 +110,7 @@
         // Inicializar Firebase
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
+        const auth = firebase.auth();
 
         // Dados padrão
         const defaultWoodData = [
@@ -270,6 +300,62 @@
             log(`Código do erro: ${error.code}`);
             showStatus('Erro de conexão com o Firebase: ' + error.message, true);
         });
+
+        // Verificar estado de autenticação
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                document.getElementById('loginSection').classList.add('hidden');
+                document.getElementById('adminSection').classList.remove('hidden');
+                log('Usuário autenticado: ' + user.email);
+            } else {
+                document.getElementById('loginSection').classList.remove('hidden');
+                document.getElementById('adminSection').classList.add('hidden');
+                log('Usuário não autenticado');
+            }
+        });
+
+        // Função de login
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            try {
+                showStatus('Tentando fazer login...');
+                log('Tentando fazer login com: ' + email);
+                
+                const userCredential = await auth.signInWithEmailAndPassword(email, password);
+                const user = userCredential.user;
+                
+                // Verificar se o usuário é admin
+                const userSnapshot = await database.ref('users').child(user.uid).once('value');
+                const userData = userSnapshot.val();
+                
+                if (userData && userData.role === 'admin') {
+                    log('Login bem sucedido como administrador');
+                    showStatus('Login realizado com sucesso!');
+                } else {
+                    await auth.signOut();
+                    throw new Error('Usuário não tem permissão de administrador');
+                }
+            } catch (error) {
+                console.error('Erro no login:', error);
+                log('Erro no login: ' + error.message);
+                showStatus('Erro no login: ' + error.message, true);
+            }
+        });
+
+        // Função de logout
+        function logout() {
+            auth.signOut().then(() => {
+                log('Logout realizado com sucesso');
+                showStatus('Logout realizado com sucesso!');
+            }).catch((error) => {
+                console.error('Erro no logout:', error);
+                log('Erro no logout: ' + error.message);
+                showStatus('Erro no logout: ' + error.message, true);
+            });
+        }
     </script>
 </body>
 </html> 

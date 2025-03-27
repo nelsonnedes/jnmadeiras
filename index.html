@@ -554,6 +554,18 @@
         .forgot-password a:hover {
             text-decoration: underline;
         }
+
+        .login-form {
+            max-width: 400px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .hidden {
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -619,6 +631,46 @@
                 </div>
             </div>
         </div>
+
+        <div id="loginSection" class="login-form hidden">
+            <h2>Login para Orçamentos</h2>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="email">E-mail:</label>
+                    <input type="email" id="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Senha:</label>
+                    <input type="password" id="password" required>
+                </div>
+                <button type="submit" class="btn">Entrar</button>
+            </form>
+            <div class="form-group" style="margin-top: 15px; text-align: center;">
+                <p>Não tem uma conta? <a href="#" onclick="showRegisterForm()">Criar Conta</a></p>
+            </div>
+        </div>
+
+        <div id="registerSection" class="login-form hidden">
+            <h2>Criar Conta</h2>
+            <form id="registerForm">
+                <div class="form-group">
+                    <label for="registerEmail">E-mail:</label>
+                    <input type="email" id="registerEmail" required>
+                </div>
+                <div class="form-group">
+                    <label for="registerPassword">Senha:</label>
+                    <input type="password" id="registerPassword" required>
+                </div>
+                <div class="form-group">
+                    <label for="confirmPassword">Confirmar Senha:</label>
+                    <input type="password" id="confirmPassword" required>
+                </div>
+                <button type="submit" class="btn">Criar Conta</button>
+            </form>
+            <div class="form-group" style="margin-top: 15px; text-align: center;">
+                <p>Já tem uma conta? <a href="#" onclick="showLoginForm()">Fazer Login</a></p>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -637,6 +689,7 @@
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
         const analytics = firebase.analytics();
+        const auth = firebase.auth();
 
         // Referências do banco de dados
         const woodRef = database.ref('woodData');
@@ -851,6 +904,84 @@
                 alert('Por favor, digite seu e-mail.');
             }
         }
+
+        // Verificar estado de autenticação
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                document.getElementById('loginSection').classList.add('hidden');
+                loadQuotes();
+                log('Usuário autenticado: ' + user.email);
+            } else {
+                document.getElementById('loginSection').classList.remove('hidden');
+                log('Usuário não autenticado');
+            }
+        });
+
+        // Função de login
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            try {
+                showStatus('Tentando fazer login...');
+                log('Tentando fazer login com: ' + email);
+                
+                await auth.signInWithEmailAndPassword(email, password);
+                log('Login bem sucedido');
+                showStatus('Login realizado com sucesso!');
+            } catch (error) {
+                console.error('Erro no login:', error);
+                log('Erro no login: ' + error.message);
+                showStatus('Erro no login: ' + error.message, true);
+            }
+        });
+
+        function showRegisterForm() {
+            document.getElementById('loginSection').classList.add('hidden');
+            document.getElementById('registerSection').classList.remove('hidden');
+        }
+
+        function showLoginForm() {
+            document.getElementById('registerSection').classList.add('hidden');
+            document.getElementById('loginSection').classList.remove('hidden');
+        }
+
+        // Função de registro
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('registerEmail').value;
+            const password = document.getElementById('registerPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+
+            if (password !== confirmPassword) {
+                showStatus('As senhas não coincidem', true);
+                return;
+            }
+
+            try {
+                showStatus('Criando conta...');
+                log('Tentando criar conta com: ' + email);
+                
+                const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+                const user = userCredential.user;
+
+                // Salvar dados do usuário
+                await database.ref('users').child(user.uid).set({
+                    email: email,
+                    role: 'user',
+                    createdAt: new Date().toISOString()
+                });
+
+                log('Conta criada com sucesso');
+                showStatus('Conta criada com sucesso!');
+                showLoginForm();
+            } catch (error) {
+                console.error('Erro ao criar conta:', error);
+                log('Erro ao criar conta: ' + error.message);
+                showStatus('Erro ao criar conta: ' + error.message, true);
+            }
+        });
     </script>
 </body>
 </html> 
