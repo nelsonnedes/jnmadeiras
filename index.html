@@ -1,39 +1,369 @@
-// Inicializar quando o documento estiver pronto
-document.addEventListener('DOMContentLoaded', () => {
-    initializeData();
-    loadCompanyLogo();
-    loadQuotes();
-});
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JN Madeiras - Orçamentos</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
 
-function initializeData() {
-    // Verificar se já existe dados de madeira
-    if (!localStorage.getItem('woodData')) {
-        const woodData = [
-            { name: 'Angelim Vermelho', price: 95000, visible: true },
-            { name: 'Jatobá', price: 134928, visible: true },
-            { name: 'Cumaru', price: 120000, visible: true },
-            { name: 'Ipê', price: 150000, visible: true },
-            { name: 'Maçaranduba', price: 130000, visible: true },
-            { name: 'Cedro', price: 80000, visible: true },
-            { name: 'Freijó', price: 90000, visible: true },
-            { name: 'Sucupira', price: 110000, visible: true },
-            { name: 'Grapia', price: 95000, visible: true },
-            { name: 'Peroba', price: 100000, visible: true }
-        ];
-        localStorage.setItem('woodData', JSON.stringify(woodData));
-    }
+        body {
+            background-color: #f5f5f5;
+            padding: 20px;
+        }
 
-    // Verificar se já existe configurações da empresa
-    if (!localStorage.getItem('companySettings')) {
-        const settings = {
-            name: 'JN Madeiras',
-            phone: '(91) 99131-1049',
-            email: 'contato@jnmadeiras.com.br',
-            address: 'Rua Principal, 123 - Centro',
-            city: 'Belém',
-            state: 'PA',
-            logo: 'Logo JN.png'
-        };
-        localStorage.setItem('companySettings', JSON.stringify(settings));
-    }
-} 
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 20px;
+            background-color: #2c1810;
+            color: white;
+            border-radius: 8px;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .logo {
+            width: 80px;
+            height: 80px;
+            object-fit: contain;
+        }
+
+        .company-info {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .company-info h1 {
+            font-size: 1.8em;
+            margin: 0;
+        }
+
+        .company-info p {
+            font-size: 0.9em;
+            margin: 0;
+        }
+
+        .whatsapp-contact {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background-color: #25D366;
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            color: white;
+            transition: background-color 0.3s;
+        }
+
+        .whatsapp-contact:hover {
+            background-color: #128C7E;
+        }
+
+        .whatsapp-contact i {
+            font-size: 1.5em;
+        }
+
+        .whatsapp-contact span {
+            font-size: 1.1em;
+            font-weight: bold;
+        }
+
+        .back-button {
+            background-color: #4a3228;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .back-button:hover {
+            background-color: #5f422f;
+        }
+
+        .menu {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .menu-button {
+            background-color: #2c1810;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.1em;
+            transition: background-color 0.3s;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .menu-button:hover {
+            background-color: #3d2319;
+        }
+
+        .menu-button i {
+            font-size: 1.2em;
+        }
+
+        .quotes-container {
+            margin-top: 30px;
+        }
+
+        .quotes-title {
+            color: #2c1810;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+
+        .quotes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .quote-card {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .quote-card h3 {
+            color: #2c1810;
+            margin-bottom: 10px;
+        }
+
+        .quote-info {
+            margin-bottom: 15px;
+        }
+
+        .quote-info p {
+            margin: 5px 0;
+            color: #666;
+        }
+
+        .quote-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .action-button {
+            background-color: #2c1810;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            text-decoration: none;
+            font-size: 0.9em;
+        }
+
+        .action-button:hover {
+            background-color: #3d2319;
+        }
+
+        .action-button.edit {
+            background-color: #4a3228;
+        }
+
+        .action-button.edit:hover {
+            background-color: #5f422f;
+        }
+
+        .action-button.delete {
+            background-color: #dc3545;
+        }
+
+        .action-button.delete:hover {
+            background-color: #c82333;
+        }
+
+        .notification-bell {
+            position: relative;
+            cursor: pointer;
+        }
+
+        .notification-count {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background-color: #dc3545;
+            color: white;
+            border-radius: 50%;
+            padding: 2px 6px;
+            font-size: 0.8em;
+            min-width: 18px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo-container">
+                <img src="Logo JN.png" alt="JN Madeiras Logo" class="logo" id="companyLogo">
+                <div class="company-info">
+                    <h1>JN Madeiras</h1>
+                    <p>Qualidade e Tradição em Madeiras</p>
+                </div>
+            </div>
+            <div style="display: flex; gap: 15px; align-items: center;">
+                <a href="index.html" class="back-button">
+                    <i class="fas fa-arrow-left"></i>
+                    <span>Voltar</span>
+                </a>
+                <a href="https://wa.me/5591991311049" target="_blank" class="whatsapp-contact">
+                    <i class="fab fa-whatsapp"></i>
+                    <span>Fale Conosco</span>
+                </a>
+            </div>
+        </div>
+
+        <div class="menu">
+            <a href="orcamento.html" class="menu-button">
+                <i class="fas fa-file-alt"></i>
+                <span>Solicitar Orçamento</span>
+            </a>
+            <a href="editar.html" class="menu-button">
+                <i class="fas fa-cog"></i>
+                <span>Área Administrativa</span>
+            </a>
+        </div>
+
+        <div class="quotes-container">
+            <h2 class="quotes-title">Orçamentos Recebidos</h2>
+            <div class="quotes-grid" id="quotesGrid">
+                <!-- Os orçamentos serão carregados aqui via JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Inicializar quando o documento estiver pronto
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeData();
+            loadCompanyLogo();
+            loadQuotes();
+        });
+
+        function initializeData() {
+            // Verificar se já existe dados de madeira
+            if (!localStorage.getItem('woodData')) {
+                const woodData = [
+                    { name: 'Angelim Vermelho', price: 95000, visible: true },
+                    { name: 'Jatobá', price: 134928, visible: true },
+                    { name: 'Cumaru', price: 120000, visible: true },
+                    { name: 'Ipê', price: 150000, visible: true },
+                    { name: 'Maçaranduba', price: 130000, visible: true },
+                    { name: 'Cedro', price: 80000, visible: true },
+                    { name: 'Freijó', price: 90000, visible: true },
+                    { name: 'Sucupira', price: 110000, visible: true },
+                    { name: 'Grapia', price: 95000, visible: true },
+                    { name: 'Peroba', price: 100000, visible: true }
+                ];
+                localStorage.setItem('woodData', JSON.stringify(woodData));
+            }
+
+            // Verificar se já existe configurações da empresa
+            if (!localStorage.getItem('companySettings')) {
+                const settings = {
+                    name: 'JN Madeiras',
+                    phone: '(91) 99131-1049',
+                    email: 'contato@jnmadeiras.com.br',
+                    address: 'Rua Principal, 123 - Centro',
+                    city: 'Belém',
+                    state: 'PA',
+                    logo: 'Logo JN.png'
+                };
+                localStorage.setItem('companySettings', JSON.stringify(settings));
+            }
+        }
+
+        function loadCompanyLogo() {
+            const settings = JSON.parse(localStorage.getItem('companySettings') || '{}');
+            const logoElement = document.getElementById('companyLogo');
+            
+            if (settings.logo) {
+                logoElement.src = settings.logo;
+                logoElement.style.display = 'block';
+            } else {
+                logoElement.style.display = 'none';
+            }
+        }
+
+        function loadQuotes() {
+            const quotesGrid = document.getElementById('quotesGrid');
+            const quotes = JSON.parse(localStorage.getItem('orcamentos') || '[]');
+            
+            quotesGrid.innerHTML = '';
+            
+            quotes.forEach((quote, index) => {
+                const card = document.createElement('div');
+                card.className = 'quote-card';
+                
+                const date = new Date(quote.data).toLocaleDateString('pt-BR');
+                
+                card.innerHTML = `
+                    <h3>${quote.nome}</h3>
+                    <div class="quote-info">
+                        <p><strong>Data:</strong> ${date}</p>
+                        <p><strong>Telefone:</strong> ${quote.telefone}</p>
+                        <p><strong>Estado:</strong> ${quote.estado}</p>
+                        <p><strong>Cidade:</strong> ${quote.cidade}</p>
+                        <p><strong>Status:</strong> ${quote.status}</p>
+                    </div>
+                    <div class="quote-actions">
+                        <a href="editar.html?id=${index}" class="action-button edit">
+                            <i class="fas fa-edit"></i> Editar
+                        </a>
+                        <button onclick="deleteQuote(${index})" class="action-button delete">
+                            <i class="fas fa-trash"></i> Excluir
+                        </button>
+                    </div>
+                `;
+                
+                quotesGrid.appendChild(card);
+            });
+        }
+
+        function deleteQuote(index) {
+            if (confirm('Tem certeza que deseja excluir este orçamento?')) {
+                const quotes = JSON.parse(localStorage.getItem('orcamentos') || '[]');
+                quotes.splice(index, 1);
+                localStorage.setItem('orcamentos', JSON.stringify(quotes));
+                loadQuotes();
+            }
+        }
+    </script>
+</body>
+</html> 
