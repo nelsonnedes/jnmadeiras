@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inicializar Banco de Dados</title>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-database-compat.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+        }
+        .status {
+            margin: 20px 0;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <h1>Inicializar Banco de Dados</h1>
+    <button onclick="initializeDatabase()">Inicializar Banco de Dados</button>
+    <div id="status" class="status"></div>
+
+    <script>
+        // Configuração do Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyBd1MS-izKfE6Y6QTH_3-giQzZz6FraBkI",
+            authDomain: "comercial-5bc01.firebaseapp.com",
+            projectId: "comercial-5bc01",
+            storageBucket: "comercial-5bc01.firebasestorage.app",
+            messagingSenderId: "956944566020",
+            appId: "1:956944566020:web:dc3e58cba5afcc6e9b7251",
+            measurementId: "G-RF6Y1FZBM9"
+        };
+
+        // Inicializar Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        // Dados padrão
+        const defaultWoodData = [
+            {
+                name: "Eucalipto",
+                price: 1200,
+                quantidadeTora: 100,
+                porcentagem: 60,
+                quantidadeSerrada: 60,
+                visible: true
+            },
+            {
+                name: "Pinus",
+                price: 1500,
+                quantidadeTora: 80,
+                porcentagem: 65,
+                quantidadeSerrada: 52,
+                visible: true
+            }
+        ];
+
+        const defaultPromoText = "Ofertas especiais para compras em grande quantidade! Entre em contato para mais informações.";
+
+        const defaultCompanySettings = {
+            logo: "Logo JN.png",
+            name: "JN Madeiras",
+            address: "Endereço da Empresa",
+            phone: "(XX) XXXX-XXXX",
+            email: "contato@jnmadeiras.com.br"
+        };
+
+        function showStatus(message, isError = false) {
+            const statusDiv = document.getElementById('status');
+            statusDiv.textContent = message;
+            statusDiv.className = 'status ' + (isError ? 'error' : 'success');
+        }
+
+        async function initializeDatabase() {
+            try {
+                showStatus('Iniciando inicialização do banco de dados...');
+
+                // Inicializar dados de madeira
+                await database.ref('woodData').set(defaultWoodData);
+                showStatus('Dados de madeira inicializados com sucesso!');
+
+                // Inicializar texto promocional
+                await database.ref('promoText').set(defaultPromoText);
+                showStatus('Texto promocional inicializado com sucesso!');
+
+                // Inicializar configurações da empresa
+                await database.ref('companySettings').set(defaultCompanySettings);
+                showStatus('Configurações da empresa inicializadas com sucesso!');
+
+                showStatus('Banco de dados inicializado com sucesso!');
+            } catch (error) {
+                console.error('Erro ao inicializar banco de dados:', error);
+                showStatus('Erro ao inicializar banco de dados: ' + error.message, true);
+            }
+        }
+    </script>
+</body>
+</html> 

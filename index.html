@@ -634,11 +634,14 @@
         };
 
         // Inicializar Firebase
-        const app = initializeApp(firebaseConfig);
-        const database = getDatabase(app);
-        const analytics = getAnalytics(app);
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        const analytics = firebase.analytics();
+
+        // Referências do banco de dados
         const woodRef = database.ref('woodData');
         const promoRef = database.ref('promoText');
+        const companySettingsRef = database.ref('companySettings');
 
         // Dados padrão
         const defaultWoodData = [
@@ -672,22 +675,20 @@
             
             // Carregar dados de madeira
             woodRef.on('value', (snapshot) => {
-                console.log('Dados recebidos do Firebase:', snapshot.val());
                 woodData = snapshot.val() || defaultWoodData;
-                console.log('Dados processados:', woodData);
+                console.log('Dados carregados do Firebase:', woodData);
                 createWoodCards();
-            }, (error) => {
-                console.error('Erro ao carregar dados de madeira:', error);
-                woodData = defaultWoodData;
-                createWoodCards();
+                // Registrar visualização de produtos
+                analytics.logEvent('view_products', {
+                    product_count: woodData.length
+                });
             });
 
-            // Escutar mudanças no texto promocional
+            // Carregar texto promocional
             promoRef.on('value', (snapshot) => {
-                console.log('Texto promocional recebido:', snapshot.val());
                 promoText = snapshot.val() || defaultPromoText;
                 const promoSection = document.getElementById('promoSection');
-                if (promoSection) {
+                if (promoText) {
                     promoSection.innerHTML = `
                         <div class="promo-content">
                             <h3>Ofertas e Promoções</h3>
@@ -695,18 +696,19 @@
                         </div>
                     `;
                     promoSection.style.display = 'block';
+                } else {
+                    promoSection.style.display = 'none';
                 }
-            }, (error) => {
-                console.error('Erro ao carregar texto promocional:', error);
-                const promoSection = document.getElementById('promoSection');
-                if (promoSection) {
-                    promoSection.innerHTML = `
-                        <div class="promo-content">
-                            <h3>Ofertas e Promoções</h3>
-                            <p>${defaultPromoText}</p>
-                        </div>
-                    `;
-                    promoSection.style.display = 'block';
+            });
+
+            // Carregar configurações da empresa
+            companySettingsRef.once('value', (snapshot) => {
+                const settings = snapshot.val() || {};
+                if (settings.logo) {
+                    const logoImg = document.querySelector('.header-logo');
+                    if (logoImg) {
+                        logoImg.src = settings.logo;
+                    }
                 }
             });
         }
