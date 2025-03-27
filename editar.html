@@ -6,6 +6,10 @@
     <title>JN Madeiras - Área Administrativa</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-analytics-compat.js"></script>
     <style>
         * {
             margin: 0;
@@ -1044,6 +1048,22 @@
     </div>
 
     <script>
+        // Configuração do Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyBd1MS-izKfE6Y6QTH_3-giQzZz6FraBkI",
+            authDomain: "comercial-5bc01.firebaseapp.com",
+            projectId: "comercial-5bc01",
+            storageBucket: "comercial-5bc01.firebasestorage.app",
+            messagingSenderId: "956944566020",
+            appId: "1:956944566020:web:dc3e58cba5afcc6e9b7251",
+            measurementId: "G-RF6Y1FZBM9"
+        };
+
+        // Inicializar Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        const analytics = firebase.analytics();
+
         let woodData = [];
         let promoText = '';
         let currentEditingQuoteIndex = -1;
@@ -1068,24 +1088,25 @@
             return parseFloat(value.replace(/[^\d,.-]/g, '').replace(',', '.'));
         }
 
-        async function loadWoodData() {
-            try {
-                // Carregar dados do arquivo data.json
-                const response = await fetch('data.json');
-                const data = await response.json();
-                
-                woodData = data.woodData;
-                promoText = data.promoText;
-                
-                // Atualizar o campo de promoções
-                document.getElementById('promoText').value = promoText;
-                
-                // Renderizar a tabela
+        function loadWoodData() {
+            const woodRef = database.ref('woodData');
+            const promoRef = database.ref('promoText');
+
+            // Carregar dados de madeira
+            woodRef.on('value', (snapshot) => {
+                woodData = snapshot.val() || [];
                 renderTable();
-            } catch (error) {
-                console.error('Erro ao carregar dados:', error);
-                alert('Erro ao carregar os dados. Por favor, recarregue a página.');
-            }
+                // Registrar visualização de produtos
+                analytics.logEvent('view_products', {
+                    product_count: woodData.length
+                });
+            });
+
+            // Carregar texto promocional
+            promoRef.on('value', (snapshot) => {
+                promoText = snapshot.val() || '';
+                document.getElementById('promoText').value = promoText;
+            });
         }
 
         function calculateSerrada(tora, porcentagem) {
@@ -1141,6 +1162,12 @@
 
         function updateName(index, value) {
             woodData[index].name = value;
+            database.ref(`woodData/${index}/name`).set(value);
+            // Registrar atualização de nome de produto
+            analytics.logEvent('update_product_name', {
+                product_index: index,
+                new_name: value
+            });
         }
 
         function updateTora(index, value) {
@@ -1150,7 +1177,13 @@
                 woodData[index].quantidadeTora,
                 woodData[index].porcentagem
             );
+            database.ref(`woodData/${index}`).set(woodData[index]);
             renderTable();
+            // Registrar atualização de quantidade
+            analytics.logEvent('update_product_quantity', {
+                product_index: index,
+                new_quantity: quantidade
+            });
         }
 
         function updatePorcentagem(index, value) {
@@ -1159,79 +1192,82 @@
                 woodData[index].quantidadeTora,
                 woodData[index].porcentagem
             );
+            database.ref(`woodData/${index}`).set(woodData[index]);
             renderTable();
+            // Registrar atualização de porcentagem
+            analytics.logEvent('update_product_percentage', {
+                product_index: index,
+                new_percentage: value
+            });
         }
 
         function updatePrice(index, value) {
             woodData[index].price = unformatNumber(value);
+            database.ref(`woodData/${index}/price`).set(woodData[index].price);
             renderTable();
+            // Registrar atualização de preço
+            analytics.logEvent('update_product_price', {
+                product_index: index,
+                new_price: woodData[index].price
+            });
         }
 
         function updateVisibility(index, visible) {
             woodData[index].visible = visible;
+            database.ref(`woodData/${index}/visible`).set(visible);
+            // Registrar atualização de visibilidade
+            analytics.logEvent('update_product_visibility', {
+                product_index: index,
+                is_visible: visible
+            });
         }
 
         function excluirItem(index) {
             if (confirm('Tem certeza que deseja excluir este item?')) {
                 woodData.splice(index, 1);
+                database.ref('woodData').set(woodData);
                 renderTable();
+                // Registrar exclusão de produto
+                analytics.logEvent('delete_product', {
+                    product_index: index
+                });
             }
         }
 
         function adicionarItem() {
-            woodData.push({
+            const newItem = {
                 name: "Nova Espécie",
                 price: 0,
                 visible: true,
                 quantidadeTora: 0,
                 porcentagem: 50,
                 quantidadeSerrada: 0
-            });
-            
+            };
+            woodData.push(newItem);
+            database.ref('woodData').set(woodData);
             renderTable();
+            // Registrar adição de produto
+            analytics.logEvent('add_product', {
+                product_count: woodData.length
+            });
         }
 
         function updatePromoText(value) {
             promoText = value;
+            database.ref('promoText').set(value);
+            // Registrar atualização de promoção
+            analytics.logEvent('update_promo', {
+                promo_length: value.length
+            });
         }
 
-        async function salvarAlteracoes() {
-            try {
-                // Garantir que todos os dados necessários estejam presentes
-                const woodDataToSave = woodData.map(wood => ({
-                    name: wood.name,
-                    price: wood.price,
-                    visible: wood.visible,
-                    quantidadeTora: wood.quantidadeTora || 0,
-                    porcentagem: wood.porcentagem || 50,
-                    quantidadeSerrada: wood.quantidadeSerrada || 0
-                }));
-
-                // Criar o objeto com os dados atualizados
-                const dataToSave = {
-                    woodData: woodDataToSave,
-                    promoText: promoText
-                };
-
-                // Salvar no arquivo data.json
-                const response = await fetch('data.json', {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(dataToSave)
-                });
-
-                if (!response.ok) {
-                    throw new Error('Erro ao salvar os dados');
-                }
-
-                alert('Alterações salvas com sucesso!');
-                window.location.reload();
-            } catch (error) {
-                console.error('Erro ao salvar alterações:', error);
-                alert('Erro ao salvar as alterações. Por favor, tente novamente.');
-            }
+        function salvarAlteracoes() {
+            database.ref('woodData').set(woodData);
+            // Registrar atualização de produtos
+            analytics.logEvent('update_products', {
+                product_count: woodData.length
+            });
+            alert('Alterações salvas com sucesso!');
         }
 
         // Funções do Menu Lateral
@@ -1314,67 +1350,61 @@
                 logo: document.getElementById('logoPreview').src
             };
             
-            localStorage.setItem('companySettings', JSON.stringify(settings));
-            alert('Configurações salvas com sucesso!');
-            closeModal('companySettingsModal');
+            database.ref('companySettings').set(settings).then(() => {
+                alert('Configurações salvas com sucesso!');
+                closeModal('companySettingsModal');
+            }).catch(error => {
+                console.error('Erro ao salvar configurações:', error);
+                alert('Erro ao salvar configurações. Por favor, tente novamente.');
+            });
         }
 
         function loadCompanySettings() {
-            const settings = JSON.parse(localStorage.getItem('companySettings') || '{}');
-            
-            if (settings.logo) {
-                document.getElementById('logoPreview').src = settings.logo;
-                document.getElementById('logoPreview').style.display = 'block';
-            }
-            
-            document.getElementById('companyName').value = settings.name || '';
-            document.getElementById('companyAddress').value = settings.address || '';
-            document.getElementById('companyPhone').value = settings.phone || '';
-            document.getElementById('companyEmail').value = settings.email || '';
+            const settingsRef = database.ref('companySettings');
+            settingsRef.once('value', (snapshot) => {
+                const settings = snapshot.val() || {};
+                
+                if (settings.logo) {
+                    document.getElementById('logoPreview').src = settings.logo;
+                    document.getElementById('logoPreview').style.display = 'block';
+                }
+                
+                document.getElementById('companyName').value = settings.name || '';
+                document.getElementById('companyAddress').value = settings.address || '';
+                document.getElementById('companyPhone').value = settings.phone || '';
+                document.getElementById('companyEmail').value = settings.email || '';
+            });
         }
 
         // Funções de Orçamentos
         function loadQuotes() {
-            let orcamentos = JSON.parse(localStorage.getItem('orcamentos') || '[]');
-            
-            // Garantir que todos os orçamentos tenham IDs
-            let needsUpdate = false;
-            orcamentos = orcamentos.map((orcamento, index) => {
-                if (!orcamento.id) {
-                    orcamento.id = Date.now().toString() + index;
-                    needsUpdate = true;
-                }
-                return orcamento;
-            });
-            
-            // Se algum orçamento foi atualizado, salvar no localStorage
-            if (needsUpdate) {
-                localStorage.setItem('orcamentos', JSON.stringify(orcamentos));
-            }
-            
-            const tbody = document.getElementById('quotesList');
-            tbody.innerHTML = '';
-            
-            orcamentos.forEach((quote, index) => {
-                const tr = document.createElement('tr');
-                const date = new Date(quote.data).toLocaleDateString('pt-BR');
+            const quotesRef = database.ref('orcamentos');
+            quotesRef.on('value', (snapshot) => {
+                const orcamentos = snapshot.val() || [];
+                const tbody = document.getElementById('quotesList');
+                tbody.innerHTML = '';
                 
-                tr.innerHTML = `
-                    <td>${date}</td>
-                    <td>${quote.nome}</td>
-                    <td>${quote.cidade}/${quote.estado}</td>
-                    <td>${quote.status}</td>
-                    <td class="action-buttons">
-                        <button class="view-button" onclick="viewQuote(${index})">
-                            <i class="fas fa-eye"></i> Ver
-                        </button>
-                        <button class="edit-button" onclick="editQuote(${index})">
-                            <i class="fas fa-edit"></i> Editar
-                        </button>
-                    </td>
-                `;
-                
-                tbody.appendChild(tr);
+                orcamentos.forEach((quote, index) => {
+                    const tr = document.createElement('tr');
+                    const date = new Date(quote.data).toLocaleDateString('pt-BR');
+                    
+                    tr.innerHTML = `
+                        <td>${date}</td>
+                        <td>${quote.nome}</td>
+                        <td>${quote.cidade}/${quote.estado}</td>
+                        <td>${quote.status}</td>
+                        <td class="action-buttons">
+                            <button class="view-button" onclick="viewQuote(${index})">
+                                <i class="fas fa-eye"></i> Ver
+                            </button>
+                            <button class="edit-button" onclick="editQuote(${index})">
+                                <i class="fas fa-edit"></i> Editar
+                            </button>
+                        </td>
+                    `;
+                    
+                    tbody.appendChild(tr);
+                });
             });
         }
 
@@ -1486,53 +1516,43 @@
                     return `${cb.value} - ${price}`;
                 });
             
-            // Atualizar o orçamento no localStorage
-            let orcamentos = JSON.parse(localStorage.getItem('orcamentos') || '[]');
-            console.log('Orçamentos existentes:', orcamentos);
-            
-            // Tentar encontrar o orçamento pelo ID
-            let index = orcamentos.findIndex(o => o.id === orcamentoId);
-            console.log('Índice encontrado:', index);
-            
-            // Se não encontrar pelo ID, usar o índice atual
-            if (index === -1 && currentEditingQuoteIndex !== -1) {
-                index = currentEditingQuoteIndex;
-                console.log('Usando índice atual:', index);
-            }
-            
-            if (index !== -1) {
-                // Criar uma cópia do orçamento existente
-                const updatedOrcamento = {
-                    ...orcamentos[index],
-                    nome: form.querySelector('#editNome').value,
-                    telefone: form.querySelector('#editTelefone').value,
-                    estado: form.querySelector('#editEstado').value,
-                    cidade: form.querySelector('#editCidade').value,
-                    especies: selectedSpecies,
-                    pedido: form.querySelector('#editPedido').value,
-                    observacoes: form.querySelector('#editObservacoes').value,
-                    contraProposta: form.querySelector('#editContraProposta').value,
-                    data: new Date().toISOString()
-                };
+            // Atualizar o orçamento no Firebase
+            const quotesRef = database.ref('orcamentos');
+            quotesRef.once('value', (snapshot) => {
+                let orcamentos = snapshot.val() || [];
+                let index = orcamentos.findIndex(o => o.id === orcamentoId);
                 
-                // Atualizar o orçamento no array
-                orcamentos[index] = updatedOrcamento;
-                
-                // Salvar no localStorage
-                localStorage.setItem('orcamentos', JSON.stringify(orcamentos));
-                console.log('Orçamento atualizado com sucesso');
-                
-                alert('Orçamento atualizado com sucesso!');
-                closeModal('editQuoteModal');
-                loadQuotes();
-            } else {
-                console.error('Orçamento não encontrado:', { 
-                    orcamentoId, 
-                    currentEditingQuoteIndex,
-                    orcamentos: orcamentos.map(o => ({ id: o.id, nome: o.nome }))
-                });
-                alert('Erro ao encontrar o orçamento para atualização. Por favor, tente novamente.');
-            }
+                if (index !== -1) {
+                    // Criar uma cópia do orçamento existente
+                    const updatedOrcamento = {
+                        ...orcamentos[index],
+                        nome: form.querySelector('#editNome').value,
+                        telefone: form.querySelector('#editTelefone').value,
+                        estado: form.querySelector('#editEstado').value,
+                        cidade: form.querySelector('#editCidade').value,
+                        especies: selectedSpecies,
+                        pedido: form.querySelector('#editPedido').value,
+                        observacoes: form.querySelector('#editObservacoes').value,
+                        contraProposta: form.querySelector('#editContraProposta').value,
+                        data: new Date().toISOString()
+                    };
+                    
+                    // Atualizar o orçamento no array
+                    orcamentos[index] = updatedOrcamento;
+                    
+                    // Salvar no Firebase
+                    quotesRef.set(orcamentos).then(() => {
+                        alert('Orçamento atualizado com sucesso!');
+                        closeModal('editQuoteModal');
+                        loadQuotes();
+                    }).catch(error => {
+                        console.error('Erro ao atualizar orçamento:', error);
+                        alert('Erro ao atualizar orçamento. Por favor, tente novamente.');
+                    });
+                } else {
+                    alert('Erro ao encontrar o orçamento para atualização. Por favor, tente novamente.');
+                }
+            });
         }
 
         function generateAndSendPDF(event) {
@@ -1776,67 +1796,61 @@
         document.addEventListener('DOMContentLoaded', () => {
             loadWoodData();
             updateNotificationCount();
+            migrateDataToFirebase();
             // Verificar novas notificações a cada minuto
             setInterval(updateNotificationCount, 60000);
+            // Registrar visualização da página
+            analytics.logEvent('page_view', {
+                page_title: 'Área Administrativa',
+                page_location: window.location.href
+            });
         });
 
-        function openEditModal(orcamento) {
-            const modal = document.getElementById('editQuoteModal');
-            const form = document.getElementById('editQuoteForm');
-            
-            // Preencher o formulário com os dados do orçamento
-            form.querySelector('#editNome').value = orcamento.nome;
-            form.querySelector('#editTelefone').value = orcamento.telefone;
-            form.querySelector('#editEstado').value = orcamento.estado;
-            form.querySelector('#editCidade').value = orcamento.cidade;
-            form.querySelector('#editPedido').value = orcamento.pedido;
-            form.querySelector('#editObservacoes').value = orcamento.observacoes || '';
-            form.querySelector('#editContraProposta').value = orcamento.contraProposta || '';
-            
-            // Preencher as espécies selecionadas
-            const speciesGrid = form.querySelector('#editEspecies');
-            speciesGrid.innerHTML = '';
-            
-            // Carregar todas as espécies disponíveis
+        // Função para migrar dados do localStorage para o Firebase
+        function migrateDataToFirebase() {
+            // Migrar dados de madeira
             const woodData = JSON.parse(localStorage.getItem('woodData') || '[]');
-            
-            // Criar um mapa de espécies selecionadas para fácil acesso
-            const selectedSpeciesMap = new Map(
-                orcamento.especies.map(species => {
-                    const [name, price] = species.split(' - ');
-                    return [name, price];
-                })
-            );
-            
-            woodData.forEach(wood => {
-                if (wood.visible) {
-                    const div = document.createElement('div');
-                    div.className = 'species-item';
-                    
-                    // Verificar se esta espécie está selecionada
-                    const isSelected = selectedSpeciesMap.has(wood.name);
-                    const price = isSelected ? selectedSpeciesMap.get(wood.name) : formatCurrency(wood.price);
-                    
-                    div.innerHTML = `
-                        <input type="checkbox" 
-                               name="editSpecies" 
-                               value="${wood.name}"
-                               id="edit_${wood.name}"
-                               ${isSelected ? 'checked' : ''}
-                               onchange="updateEditSpeciesSelection(this)">
-                        <label for="edit_${wood.name}">
-                            ${wood.name}
-                            <span class="price">${price}</span>
-                        </label>
-                    `;
-                    speciesGrid.appendChild(div);
-                }
-            });
-            
-            // Armazenar o ID do orçamento para referência
-            form.dataset.orcamentoId = orcamento.id;
-            
-            modal.style.display = 'block';
+            if (woodData.length > 0) {
+                database.ref('woodData').set(woodData).then(() => {
+                    console.log('Dados de madeira migrados com sucesso');
+                    localStorage.removeItem('woodData'); // Remover do localStorage após migração
+                }).catch(error => {
+                    console.error('Erro ao migrar dados de madeira:', error);
+                });
+            }
+
+            // Migrar configurações da empresa
+            const companySettings = JSON.parse(localStorage.getItem('companySettings') || '{}');
+            if (Object.keys(companySettings).length > 0) {
+                database.ref('companySettings').set(companySettings).then(() => {
+                    console.log('Configurações da empresa migradas com sucesso');
+                    localStorage.removeItem('companySettings'); // Remover do localStorage após migração
+                }).catch(error => {
+                    console.error('Erro ao migrar configurações da empresa:', error);
+                });
+            }
+
+            // Migrar orçamentos
+            const orcamentos = JSON.parse(localStorage.getItem('orcamentos') || '[]');
+            if (orcamentos.length > 0) {
+                database.ref('orcamentos').set(orcamentos).then(() => {
+                    console.log('Orçamentos migrados com sucesso');
+                    localStorage.removeItem('orcamentos'); // Remover do localStorage após migração
+                }).catch(error => {
+                    console.error('Erro ao migrar orçamentos:', error);
+                });
+            }
+
+            // Migrar texto promocional
+            const promoText = localStorage.getItem('promoText');
+            if (promoText) {
+                database.ref('promoText').set(promoText).then(() => {
+                    console.log('Texto promocional migrado com sucesso');
+                    localStorage.removeItem('promoText'); // Remover do localStorage após migração
+                }).catch(error => {
+                    console.error('Erro ao migrar texto promocional:', error);
+                });
+            }
         }
 
         function updateEditSpeciesSelection(checkbox) {

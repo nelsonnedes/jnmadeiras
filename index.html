@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>JN Madeiras - Espécies de Madeira</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-analytics-compat.js"></script>
     <style>
         * {
             margin: 0;
@@ -618,66 +622,46 @@
     </div>
 
     <script>
-        const woodData = [
-            { 
-                name: "Angelim Vermelho", 
-                price: 95000, 
-                visible: true,
-                quantidadeTora: 95.000,
-                porcentagem: 50,
-                quantidadeSerrada: 47.500
-            },
-            { name: "Angelim-Amargoso", price: 225.4383, visible: true, quantidadeTora: 0, quantidadeSerrada: 0 },
-            { name: "Angelim-Pedra", price: 93.0246, visible: true, quantidadeTora: 0, quantidadeSerrada: 0 },
-            { name: "Araracanga", price: 20.770, visible: true, quantidadeTora: 0, quantidadeSerrada: 0 },
-            { name: "Cumaru Vermelho", price: 15.000, visible: true, quantidadeTora: 0, quantidadeSerrada: 0 },
-            { name: "Fava-Orelha-de-Macaco", price: 117.888, visible: true, quantidadeTora: 0, quantidadeSerrada: 0 },
-            { name: "Guariúba", price: 3.236, visible: true, quantidadeTora: 0, quantidadeSerrada: 0 },
-            { name: "Jatobá", price: 134.928, visible: true, quantidadeTora: 0, quantidadeSerrada: 0 },
-            { name: "Louro Tamaguare", price: 45.000, visible: true, quantidadeTora: 0, quantidadeSerrada: 0 },
-            { name: "Mandioqueiro", price: 15.000, visible: true, quantidadeTora: 0, quantidadeSerrada: 0 },
-            { name: "Maçaranduba", price: 16.054, visible: true, quantidadeTora: 0, quantidadeSerrada: 0 },
-            { name: "Oiticica", price: 24.713, visible: true, quantidadeTora: 0, quantidadeSerrada: 0 },
-            { name: "Orelha de Macaco", price: 21.502, visible: true, quantidadeTora: 0, quantidadeSerrada: 0 },
-            { name: "Pequiá", price: 78.672, visible: true, quantidadeTora: 0, quantidadeSerrada: 0 },
-            { name: "Quaruba-Cedro", price: 42.173, visible: true, quantidadeTora: 0, quantidadeSerrada: 0 },
-            { name: "Quarubatinga", price: 80.629, visible: true, quantidadeTora: 0, quantidadeSerrada: 0 },
-            { name: "Tanibuca", price: 62.714, visible: true, quantidadeTora: 0, quantidadeSerrada: 0 },
-            { name: "Táxi", price: 75.000, visible: true, quantidadeTora: 0, quantidadeSerrada: 0 },
-            { name: "Timborana", price: 35.000, visible: true, quantidadeTora: 0, quantidadeSerrada: 0 }
-        ];
+        // Configuração do Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyBd1MS-izKfE6Y6QTH_3-giQzZz6FraBkI",
+            authDomain: "comercial-5bc01.firebaseapp.com",
+            projectId: "comercial-5bc01",
+            storageBucket: "comercial-5bc01.firebasestorage.app",
+            messagingSenderId: "956944566020",
+            appId: "1:956944566020:web:dc3e58cba5afcc6e9b7251",
+            measurementId: "G-RF6Y1FZBM9"
+        };
 
-        function formatNumber(number) {
-            return number.toLocaleString('pt-BR', {
-                minimumFractionDigits: 3,
-                maximumFractionDigits: 3
+        // Inicializar Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        const analytics = firebase.analytics();
+
+        let woodData = [];
+        let promoText = '';
+
+        // Função para carregar dados do Firebase
+        function loadDataFromFirebase() {
+            const woodRef = database.ref('woodData');
+            const promoRef = database.ref('promoText');
+            const companySettingsRef = database.ref('companySettings');
+
+            // Escutar mudanças nos dados de madeira
+            woodRef.on('value', (snapshot) => {
+                woodData = snapshot.val() || [];
+                createWoodCards();
+                // Registrar visualização de produtos
+                analytics.logEvent('view_products', {
+                    product_count: woodData.length
+                });
             });
-        }
 
-        function formatCurrency(value) {
-            return new Intl.NumberFormat('pt-BR', {
-                style: 'currency',
-                currency: 'BRL',
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2
-            }).format(value);
-        }
-
-        async function createWoodCards() {
-            try {
-                // Carregar dados do arquivo data.json
-                const response = await fetch('data.json');
-                const data = await response.json();
-                
-                const woodData = data.woodData;
-                const promoText = data.promoText;
-                
-                // Ordenar por nome
-                woodData.sort((a, b) => a.name.localeCompare(b.name));
-                
-                // Atualizar seção de promoções
-                const promoSection = document.querySelector('.promo-section');
-                if (promoText && promoText.trim() !== '') {
+            // Escutar mudanças no texto promocional
+            promoRef.on('value', (snapshot) => {
+                promoText = snapshot.val() || '';
+                const promoSection = document.getElementById('promoSection');
+                if (promoText) {
                     promoSection.innerHTML = `
                         <div class="promo-content">
                             <h3>Ofertas e Promoções</h3>
@@ -688,62 +672,88 @@
                 } else {
                     promoSection.style.display = 'none';
                 }
-                
-                // Criar cards
-                const woodGrid = document.querySelector('.wood-grid');
-                woodGrid.innerHTML = '';
-                
-                woodData.forEach(wood => {
-                    if (wood.visible) {
-                        const card = document.createElement('div');
-                        card.className = 'wood-card';
-                        card.innerHTML = `
-                            <h3>${wood.name}</h3>
-                            <div class="wood-info">
-                                <p><strong>Quantidade em Tora:</strong> ${formatNumber(wood.quantidadeTora || 0)}</p>
-                                <p><strong>Rendimento:</strong> ${wood.porcentagem || 50}%</p>
-                                <p><strong>Quantidade Serrada:</strong> ${formatNumber(wood.quantidadeSerrada || 0)}</p>
-                                <p class="wood-price"><strong>Preço:</strong> ${formatCurrency(wood.price)}</p>
-                            </div>
-                            <div class="stock-info">
-                                <p><strong>Estoque:</strong> ${wood.quantidadeSerrada ? 'Disponível' : 'Sob consulta'}</p>
-                            </div>
-                        `;
-                        woodGrid.appendChild(card);
+            });
+
+            // Carregar configurações da empresa
+            companySettingsRef.once('value', (snapshot) => {
+                const settings = snapshot.val() || {};
+                if (settings.logo) {
+                    const logoImg = document.querySelector('.header-logo');
+                    if (logoImg) {
+                        logoImg.src = settings.logo;
                     }
-                });
-            } catch (error) {
-                console.error('Erro ao carregar dados:', error);
-                // Em caso de erro, mostrar uma mensagem amigável
-                const woodGrid = document.querySelector('.wood-grid');
-                woodGrid.innerHTML = `
-                    <div class="error-message">
-                        <p>Desculpe, não foi possível carregar os dados dos produtos.</p>
-                        <p>Por favor, tente novamente mais tarde.</p>
-                    </div>
-                `;
-            }
+                }
+            });
         }
 
-        // Inicializar quando o documento estiver pronto
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('DOM carregado, iniciando...');
-            try {
-                // Criar os cards
-                createWoodCards();
-                
-                // Carregar logo e outras configurações
-                loadCompanyLogo();
-                loadQuotes();
-                updateNotificationCount();
-                
-                // Configurar atualização de notificações
-                setInterval(updateNotificationCount, 60000);
-                
-                console.log('Inicialização concluída com sucesso');
-            } catch (error) {
-                console.error('Erro durante a inicialização:', error);
-            }
+        // Função para criar cards de madeira
+        function createWoodCards() {
+            const woodGrid = document.getElementById('woodGrid');
+            woodGrid.innerHTML = '';
+
+            woodData.forEach(wood => {
+                if (wood.visible) {
+                    const card = document.createElement('div');
+                    card.className = 'wood-card';
+                    card.innerHTML = `
+                        <div class="wood-name">${wood.name}</div>
+                        <div class="wood-info">
+                            <div class="stock-info">
+                                <div class="stock-item">
+                                    <div class="stock-label">Quantidade em Tora</div>
+                                    <div class="stock-value">${formatVolume(wood.quantidadeTora)}</div>
+                                </div>
+                                <div class="stock-separator"></div>
+                                <div class="stock-item">
+                                    <div class="stock-label">Rendimento</div>
+                                    <div class="stock-value">${wood.porcentagem}%</div>
+                                </div>
+                                <div class="stock-separator"></div>
+                                <div class="stock-item">
+                                    <div class="stock-label">Quantidade Serrada</div>
+                                    <div class="stock-value">${formatVolume(wood.quantidadeSerrada)}</div>
+                                </div>
+                            </div>
+                            <div class="wood-price">
+                                <span class="price-label">Preço por m³:</span>
+                                <span class="price-value">${formatCurrency(wood.price)}</span>
+                            </div>
+                        </div>
+                        <button class="quote-button" onclick="window.location.href='orcamento.html'">
+                            <i class="fas fa-calculator"></i> Solicitar Orçamento
+                        </button>
+                    `;
+                    woodGrid.appendChild(card);
+                }
+            });
+        }
+
+        // Função para formatar volume
+        function formatVolume(value) {
+            return new Intl.NumberFormat('pt-BR', {
+                minimumFractionDigits: 3,
+                maximumFractionDigits: 3
+            }).format(value) + ' m³';
+        }
+
+        // Função para formatar moeda
+        function formatCurrency(value) {
+            return new Intl.NumberFormat('pt-BR', {
+                style: 'currency',
+                currency: 'BRL',
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            }).format(value);
+        }
+
+        // Carregar dados quando a página carregar
+        document.addEventListener('DOMContentLoaded', () => {
+            loadDataFromFirebase();
+            // Registrar visualização da página
+            analytics.logEvent('page_view', {
+                page_title: 'Home',
+                page_location: window.location.href
+            });
         });
 
         function checkPassword() {
