@@ -650,6 +650,7 @@
             // Escutar mudanças nos dados de madeira
             woodRef.on('value', (snapshot) => {
                 woodData = snapshot.val() || [];
+                console.log('Dados carregados do Firebase:', woodData); // Log para debug
                 createWoodCards();
                 // Registrar visualização de produtos
                 analytics.logEvent('view_products', {
@@ -691,32 +692,43 @@
             const woodGrid = document.getElementById('woodGrid');
             woodGrid.innerHTML = '';
 
-            woodData.forEach(wood => {
-                if (wood.visible) {
+            console.log('Criando cards com dados:', woodData); // Log para debug
+
+            if (!Array.isArray(woodData)) {
+                console.error('woodData não é um array:', woodData);
+                return;
+            }
+
+            // Ordenar os dados por nome
+            woodData.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+
+            woodData.forEach((wood, index) => {
+                console.log(`Processando item ${index}:`, wood); // Log para debug
+                if (wood && wood.visible !== false) {
                     const card = document.createElement('div');
                     card.className = 'wood-card';
                     card.innerHTML = `
-                        <div class="wood-name">${wood.name}</div>
+                        <div class="wood-name">${wood.name || 'Sem nome'}</div>
                         <div class="wood-info">
                             <div class="stock-info">
                                 <div class="stock-item">
                                     <div class="stock-label">Quantidade em Tora</div>
-                                    <div class="stock-value">${formatVolume(wood.quantidadeTora)}</div>
+                                    <div class="stock-value">${formatVolume(wood.quantidadeTora || 0)}</div>
                                 </div>
                                 <div class="stock-separator"></div>
                                 <div class="stock-item">
                                     <div class="stock-label">Rendimento</div>
-                                    <div class="stock-value">${wood.porcentagem}%</div>
+                                    <div class="stock-value">${wood.porcentagem || 0}%</div>
                                 </div>
                                 <div class="stock-separator"></div>
                                 <div class="stock-item">
                                     <div class="stock-label">Quantidade Serrada</div>
-                                    <div class="stock-value">${formatVolume(wood.quantidadeSerrada)}</div>
+                                    <div class="stock-value">${formatVolume(wood.quantidadeSerrada || 0)}</div>
                                 </div>
                             </div>
                             <div class="wood-price">
                                 <span class="price-label">Preço por m³:</span>
-                                <span class="price-value">${formatCurrency(wood.price)}</span>
+                                <span class="price-value">${formatCurrency(wood.price || 0)}</span>
                             </div>
                         </div>
                         <button class="quote-button" onclick="window.location.href='orcamento.html'">

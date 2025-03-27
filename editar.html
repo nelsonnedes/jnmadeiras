@@ -1244,11 +1244,16 @@
                 quantidadeSerrada: 0
             };
             woodData.push(newItem);
-            database.ref('woodData').set(woodData);
-            renderTable();
-            // Registrar adição de produto
-            analytics.logEvent('add_product', {
-                product_count: woodData.length
+            database.ref('woodData').set(woodData).then(() => {
+                console.log('Novo item adicionado com sucesso');
+                renderTable();
+                // Registrar adição de produto
+                analytics.logEvent('add_product', {
+                    product_count: woodData.length
+                });
+            }).catch(error => {
+                console.error('Erro ao adicionar item:', error);
+                alert('Erro ao adicionar item. Por favor, tente novamente.');
             });
         }
 
