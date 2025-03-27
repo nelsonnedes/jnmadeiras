@@ -225,6 +225,67 @@
             min-width: 18px;
             text-align: center;
         }
+
+        .commercial-section {
+            margin-top: 30px;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .commercial-section h2 {
+            color: #2c1810;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+        }
+
+        .commercial-section p {
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .products-section {
+            margin-top: 30px;
+        }
+
+        .products-title {
+            color: #2c1810;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .product-card {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .product-card h3 {
+            color: #2c1810;
+            margin-bottom: 10px;
+        }
+
+        .product-price {
+            color: #25D366;
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        .product-description {
+            color: #666;
+            font-size: 0.9em;
+            margin-top: 10px;
+        }
     </style>
 </head>
 <body>
@@ -266,6 +327,19 @@
                 <!-- Os orçamentos serão carregados aqui via JavaScript -->
             </div>
         </div>
+
+        <div class="commercial-section">
+            <h2>Sobre a JN Madeiras</h2>
+            <p>A JN Madeiras é referência em madeiras nobres de alta qualidade. Nossa empresa oferece uma ampla variedade de espécies de madeira, todas com procedência certificada e preços competitivos. Trabalhamos com madeiras nobres como Angelim Vermelho, Jatobá, Cumaru, Ipê e muitas outras.</p>
+            <p>Nossa missão é fornecer produtos de excelência, garantindo a satisfação total de nossos clientes. Com anos de experiência no mercado, construímos uma reputação sólida baseada na qualidade e confiança.</p>
+        </div>
+
+        <div class="products-section">
+            <h2 class="products-title">Nossas Madeiras</h2>
+            <div class="products-grid" id="productsGrid">
+                <!-- Os produtos serão carregados aqui via JavaScript -->
+            </div>
+        </div>
     </div>
 
     <script>
@@ -274,22 +348,23 @@
             initializeData();
             loadCompanyLogo();
             loadQuotes();
+            loadProducts();
         });
 
         function initializeData() {
             // Verificar se já existe dados de madeira
             if (!localStorage.getItem('woodData')) {
                 const woodData = [
-                    { name: 'Angelim Vermelho', price: 95000, visible: true },
-                    { name: 'Jatobá', price: 134928, visible: true },
-                    { name: 'Cumaru', price: 120000, visible: true },
-                    { name: 'Ipê', price: 150000, visible: true },
-                    { name: 'Maçaranduba', price: 130000, visible: true },
-                    { name: 'Cedro', price: 80000, visible: true },
-                    { name: 'Freijó', price: 90000, visible: true },
-                    { name: 'Sucupira', price: 110000, visible: true },
-                    { name: 'Grapia', price: 95000, visible: true },
-                    { name: 'Peroba', price: 100000, visible: true }
+                    { name: 'Angelim Vermelho', price: 95000, visible: true, description: 'Madeira nobre de alta resistência e durabilidade' },
+                    { name: 'Jatobá', price: 134928, visible: true, description: 'Excelente para móveis e acabamentos' },
+                    { name: 'Cumaru', price: 120000, visible: true, description: 'Ideal para decks e áreas externas' },
+                    { name: 'Ipê', price: 150000, visible: true, description: 'Madeira de lei com alta resistência' },
+                    { name: 'Maçaranduba', price: 130000, visible: true, description: 'Perfeita para móveis e estruturas' },
+                    { name: 'Cedro', price: 80000, visible: true, description: 'Leve e resistente, ótima para acabamentos' },
+                    { name: 'Freijó', price: 90000, visible: true, description: 'Excelente para móveis e painéis' },
+                    { name: 'Sucupira', price: 110000, visible: true, description: 'Ideal para estruturas e móveis' },
+                    { name: 'Grapia', price: 95000, visible: true, description: 'Ótima para móveis e acabamentos' },
+                    { name: 'Peroba', price: 100000, visible: true, description: 'Madeira nobre com excelente durabilidade' }
                 ];
                 localStorage.setItem('woodData', JSON.stringify(woodData));
             }
@@ -363,6 +438,37 @@
                 localStorage.setItem('orcamentos', JSON.stringify(quotes));
                 loadQuotes();
             }
+        }
+
+        function formatCurrency(value) {
+            return new Intl.NumberFormat('pt-BR', {
+                style: 'currency',
+                currency: 'BRL',
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            }).format(value);
+        }
+
+        function loadProducts() {
+            const productsGrid = document.getElementById('productsGrid');
+            const woodData = JSON.parse(localStorage.getItem('woodData') || '[]');
+            
+            productsGrid.innerHTML = '';
+            
+            woodData.forEach(wood => {
+                if (wood.visible) {
+                    const card = document.createElement('div');
+                    card.className = 'product-card';
+                    
+                    card.innerHTML = `
+                        <h3>${wood.name}</h3>
+                        <p class="product-description">${wood.description}</p>
+                        <p class="product-price">${formatCurrency(wood.price)}</p>
+                    `;
+                    
+                    productsGrid.appendChild(card);
+                }
+            });
         }
     </script>
 </body>
