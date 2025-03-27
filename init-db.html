@@ -130,52 +130,88 @@
             try {
                 showStatus('Iniciando inicialização do banco de dados...');
                 console.log('Iniciando processo de inicialização...');
+                console.log('Configuração do Firebase:', firebaseConfig);
 
                 // Testar conexão com o Firebase
                 console.log('Testando conexão com o Firebase...');
                 try {
-                    await database.ref('test').set({ timestamp: Date.now() });
+                    const testRef = database.ref('test');
+                    await testRef.set({ timestamp: Date.now() });
+                    const snapshot = await testRef.once('value');
+                    console.log('Teste de conexão bem sucedido:', snapshot.val());
                     console.log('Conexão com o Firebase estabelecida com sucesso!');
                 } catch (error) {
-                    console.error('Erro ao testar conexão:', error);
-                    throw new Error('Não foi possível conectar ao Firebase. Verifique se o banco de dados está ativo.');
+                    console.error('Erro detalhado ao testar conexão:', error);
+                    console.error('Código do erro:', error.code);
+                    console.error('Mensagem do erro:', error.message);
+                    throw new Error(`Não foi possível conectar ao Firebase: ${error.message}`);
                 }
 
                 // Inicializar dados de madeira
                 console.log('Inicializando dados de madeira...');
-                await database.ref('woodData').set(defaultWoodData);
-                console.log('Dados de madeira salvos com sucesso');
-                showStatus('Dados de madeira inicializados com sucesso!');
+                try {
+                    await database.ref('woodData').set(defaultWoodData);
+                    console.log('Dados de madeira salvos com sucesso');
+                    showStatus('Dados de madeira inicializados com sucesso!');
+                } catch (error) {
+                    console.error('Erro ao salvar dados de madeira:', error);
+                    throw error;
+                }
 
                 // Inicializar texto promocional
                 console.log('Inicializando texto promocional...');
-                await database.ref('promoText').set(defaultPromoText);
-                console.log('Texto promocional salvo com sucesso');
-                showStatus('Texto promocional inicializado com sucesso!');
+                try {
+                    await database.ref('promoText').set(defaultPromoText);
+                    console.log('Texto promocional salvo com sucesso');
+                    showStatus('Texto promocional inicializado com sucesso!');
+                } catch (error) {
+                    console.error('Erro ao salvar texto promocional:', error);
+                    throw error;
+                }
 
                 // Inicializar configurações da empresa
                 console.log('Inicializando configurações da empresa...');
-                await database.ref('companySettings').set(defaultCompanySettings);
-                console.log('Configurações da empresa salvas com sucesso');
-                showStatus('Configurações da empresa inicializadas com sucesso!');
+                try {
+                    await database.ref('companySettings').set(defaultCompanySettings);
+                    console.log('Configurações da empresa salvas com sucesso');
+                    showStatus('Configurações da empresa inicializadas com sucesso!');
+                } catch (error) {
+                    console.error('Erro ao salvar configurações da empresa:', error);
+                    throw error;
+                }
 
                 // Inicializar estrutura de orçamentos
                 console.log('Inicializando estrutura de orçamentos...');
-                await database.ref('quotes').set(defaultQuotes);
-                console.log('Estrutura de orçamentos salva com sucesso');
-                showStatus('Estrutura de orçamentos inicializada com sucesso!');
+                try {
+                    await database.ref('quotes').set(defaultQuotes);
+                    console.log('Estrutura de orçamentos salva com sucesso');
+                    showStatus('Estrutura de orçamentos inicializada com sucesso!');
+                } catch (error) {
+                    console.error('Erro ao salvar estrutura de orçamentos:', error);
+                    throw error;
+                }
 
                 // Inicializar estrutura de notificações
                 console.log('Inicializando estrutura de notificações...');
-                await database.ref('notifications').set(defaultNotifications);
-                console.log('Estrutura de notificações salva com sucesso');
-                showStatus('Estrutura de notificações inicializada com sucesso!');
+                try {
+                    await database.ref('notifications').set(defaultNotifications);
+                    console.log('Estrutura de notificações salva com sucesso');
+                    showStatus('Estrutura de notificações inicializada com sucesso!');
+                } catch (error) {
+                    console.error('Erro ao salvar estrutura de notificações:', error);
+                    throw error;
+                }
 
                 // Inicializar estrutura de usuários
                 console.log('Inicializando estrutura de usuários...');
-                await database.ref('users').set(defaultUsers);
-                console.log('Estrutura de usuários salva com sucesso');
-                showStatus('Estrutura de usuários inicializada com sucesso!');
+                try {
+                    await database.ref('users').set(defaultUsers);
+                    console.log('Estrutura de usuários salva com sucesso');
+                    showStatus('Estrutura de usuários inicializada com sucesso!');
+                } catch (error) {
+                    console.error('Erro ao salvar estrutura de usuários:', error);
+                    throw error;
+                }
 
                 showStatus('Banco de dados inicializado com sucesso!');
                 console.log('Processo de inicialização concluído com sucesso!');
@@ -189,6 +225,8 @@
         // Adicionar listener para erros de conexão
         database.ref().on('error', (error) => {
             console.error('Erro de conexão com o Firebase:', error);
+            console.error('Código do erro:', error.code);
+            console.error('Mensagem do erro:', error.message);
             showStatus('Erro de conexão com o Firebase: ' + error.message, true);
         });
     </script>
