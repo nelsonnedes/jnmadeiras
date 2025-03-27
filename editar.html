@@ -1221,31 +1221,9 @@
         }
 
         function salvarAlteracoes() {
-            try {
-                // Garantir que todos os dados necessários estejam presentes
-                woodData.forEach(wood => {
-                    if (!wood.quantidadeTora) wood.quantidadeTora = 0;
-                    if (!wood.quantidadeSerrada) wood.quantidadeSerrada = 0;
-                    if (!wood.porcentagem) wood.porcentagem = 50;
-                    if (wood.visible === undefined) wood.visible = true;
-                });
-
-                // Salvar no localStorage
-                localStorage.setItem('woodData', JSON.stringify(woodData));
-                localStorage.setItem('promoText', promoText);
-                
-                // Forçar uma atualização da tabela
-                renderTable();
-                
-                // Mostrar mensagem de sucesso
-                alert('Alterações salvas com sucesso!');
-                
-                // Log para debug
-                console.log('Dados salvos:', woodData);
-            } catch (error) {
-                console.error('Erro ao salvar alterações:', error);
-                alert('Erro ao salvar as alterações. Por favor, tente novamente.');
-            }
+            localStorage.setItem('woodData', JSON.stringify(woodData));
+            localStorage.setItem('promoText', promoText);
+            alert('Alterações salvas com sucesso!');
         }
 
         // Funções do Menu Lateral
@@ -1349,11 +1327,27 @@
 
         // Funções de Orçamentos
         function loadQuotes() {
-            const quotes = JSON.parse(localStorage.getItem('orcamentos') || '[]');
+            let orcamentos = JSON.parse(localStorage.getItem('orcamentos') || '[]');
+            
+            // Garantir que todos os orçamentos tenham IDs
+            let needsUpdate = false;
+            orcamentos = orcamentos.map((orcamento, index) => {
+                if (!orcamento.id) {
+                    orcamento.id = Date.now().toString() + index;
+                    needsUpdate = true;
+                }
+                return orcamento;
+            });
+            
+            // Se algum orçamento foi atualizado, salvar no localStorage
+            if (needsUpdate) {
+                localStorage.setItem('orcamentos', JSON.stringify(orcamentos));
+            }
+            
             const tbody = document.getElementById('quotesList');
             tbody.innerHTML = '';
             
-            quotes.forEach((quote, index) => {
+            orcamentos.forEach((quote, index) => {
                 const tr = document.createElement('tr');
                 const date = new Date(quote.data).toLocaleDateString('pt-BR');
                 
@@ -1414,6 +1408,14 @@
             const quote = quotes[index];
             currentEditingQuoteIndex = index;
 
+            console.log('Editando orçamento:', { index, quote });
+
+            // Garantir que o orçamento tenha um ID
+            if (!quote.id) {
+                quote.id = Date.now().toString();
+                console.log('Novo ID gerado:', quote.id);
+            }
+
             // Preencher o formulário com os dados do orçamento
             document.getElementById('editNome').value = quote.nome;
             document.getElementById('editTelefone').value = quote.telefone;
@@ -1457,6 +1459,7 @@
 
             // Armazenar o ID do orçamento para referência
             document.getElementById('editQuoteForm').dataset.orcamentoId = quote.id;
+            console.log('ID do orçamento armazenado:', quote.id);
 
             showModal('editQuoteModal');
         }
@@ -1465,6 +1468,8 @@
             event.preventDefault();
             const form = document.getElementById('editQuoteForm');
             const orcamentoId = form.dataset.orcamentoId;
+            
+            console.log('Tentando salvar orçamento com ID:', orcamentoId);
             
             // Obter as espécies selecionadas com seus preços
             const selectedSpecies = Array.from(document.querySelectorAll('#editQuoteForm input[name="editSpecies"]:checked'))
@@ -1475,10 +1480,21 @@
             
             // Atualizar o orçamento no localStorage
             let orcamentos = JSON.parse(localStorage.getItem('orcamentos') || '[]');
-            const index = orcamentos.findIndex(o => o.id === orcamentoId);
+            console.log('Orçamentos existentes:', orcamentos);
+            
+            // Tentar encontrar o orçamento pelo ID
+            let index = orcamentos.findIndex(o => o.id === orcamentoId);
+            console.log('Índice encontrado:', index);
+            
+            // Se não encontrar pelo ID, usar o índice atual
+            if (index === -1 && currentEditingQuoteIndex !== -1) {
+                index = currentEditingQuoteIndex;
+                console.log('Usando índice atual:', index);
+            }
             
             if (index !== -1) {
-                orcamentos[index] = {
+                // Criar uma cópia do orçamento existente
+                const updatedOrcamento = {
                     ...orcamentos[index],
                     nome: form.querySelector('#editNome').value,
                     telefone: form.querySelector('#editTelefone').value,
@@ -1491,12 +1507,23 @@
                     data: new Date().toISOString()
                 };
                 
+                // Atualizar o orçamento no array
+                orcamentos[index] = updatedOrcamento;
+                
+                // Salvar no localStorage
                 localStorage.setItem('orcamentos', JSON.stringify(orcamentos));
+                console.log('Orçamento atualizado com sucesso');
+                
                 alert('Orçamento atualizado com sucesso!');
                 closeModal('editQuoteModal');
                 loadQuotes();
             } else {
-                alert('Erro ao encontrar o orçamento para atualização.');
+                console.error('Orçamento não encontrado:', { 
+                    orcamentoId, 
+                    currentEditingQuoteIndex,
+                    orcamentos: orcamentos.map(o => ({ id: o.id, nome: o.nome }))
+                });
+                alert('Erro ao encontrar o orçamento para atualização. Por favor, tente novamente.');
             }
         }
 

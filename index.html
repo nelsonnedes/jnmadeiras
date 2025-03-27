@@ -627,24 +627,24 @@
                 porcentagem: 50,
                 quantidadeSerrada: 47.500
             },
-            { name: "Angelim-Amargoso", price: 225.4383, visible: true },
-            { name: "Angelim-Pedra", price: 93.0246, visible: true },
-            { name: "Araracanga", price: 20.770, visible: true },
-            { name: "Cumaru Vermelho", price: 15.000, visible: true },
-            { name: "Fava-Orelha-de-Macaco", price: 117.888, visible: true },
-            { name: "Guariúba", price: 3.236, visible: true },
-            { name: "Jatobá", price: 134.928, visible: true },
-            { name: "Louro Tamaguare", price: 45.000, visible: true },
-            { name: "Mandioqueiro", price: 15.000, visible: true },
-            { name: "Maçaranduba", price: 16.054, visible: true },
-            { name: "Oiticica", price: 24.713, visible: true },
-            { name: "Orelha de Macaco", price: 21.502, visible: true },
-            { name: "Pequiá", price: 78.672, visible: true },
-            { name: "Quaruba-Cedro", price: 42.173, visible: true },
-            { name: "Quarubatinga", price: 80.629, visible: true },
-            { name: "Tanibuca", price: 62.714, visible: true },
-            { name: "Táxi", price: 75.000, visible: true },
-            { name: "Timborana", price: 35.000, visible: true }
+            { name: "Angelim-Amargoso", price: 225.4383, visible: true, quantidadeTora: 0, quantidadeSerrada: 0 },
+            { name: "Angelim-Pedra", price: 93.0246, visible: true, quantidadeTora: 0, quantidadeSerrada: 0 },
+            { name: "Araracanga", price: 20.770, visible: true, quantidadeTora: 0, quantidadeSerrada: 0 },
+            { name: "Cumaru Vermelho", price: 15.000, visible: true, quantidadeTora: 0, quantidadeSerrada: 0 },
+            { name: "Fava-Orelha-de-Macaco", price: 117.888, visible: true, quantidadeTora: 0, quantidadeSerrada: 0 },
+            { name: "Guariúba", price: 3.236, visible: true, quantidadeTora: 0, quantidadeSerrada: 0 },
+            { name: "Jatobá", price: 134.928, visible: true, quantidadeTora: 0, quantidadeSerrada: 0 },
+            { name: "Louro Tamaguare", price: 45.000, visible: true, quantidadeTora: 0, quantidadeSerrada: 0 },
+            { name: "Mandioqueiro", price: 15.000, visible: true, quantidadeTora: 0, quantidadeSerrada: 0 },
+            { name: "Maçaranduba", price: 16.054, visible: true, quantidadeTora: 0, quantidadeSerrada: 0 },
+            { name: "Oiticica", price: 24.713, visible: true, quantidadeTora: 0, quantidadeSerrada: 0 },
+            { name: "Orelha de Macaco", price: 21.502, visible: true, quantidadeTora: 0, quantidadeSerrada: 0 },
+            { name: "Pequiá", price: 78.672, visible: true, quantidadeTora: 0, quantidadeSerrada: 0 },
+            { name: "Quaruba-Cedro", price: 42.173, visible: true, quantidadeTora: 0, quantidadeSerrada: 0 },
+            { name: "Quarubatinga", price: 80.629, visible: true, quantidadeTora: 0, quantidadeSerrada: 0 },
+            { name: "Tanibuca", price: 62.714, visible: true, quantidadeTora: 0, quantidadeSerrada: 0 },
+            { name: "Táxi", price: 75.000, visible: true, quantidadeTora: 0, quantidadeSerrada: 0 },
+            { name: "Timborana", price: 35.000, visible: true, quantidadeTora: 0, quantidadeSerrada: 0 }
         ];
 
         function formatNumber(number) {
@@ -661,65 +661,6 @@
                 minimumFractionDigits: 2,
                 maximumFractionDigits: 2
             }).format(value);
-        }
-
-        function initializeData() {
-            try {
-                // Tentar carregar dados do localStorage
-                try {
-                    const woodData = localStorage.getItem('woodData');
-                    const companySettings = localStorage.getItem('companySettings');
-                    
-                    if (!woodData) {
-                        console.log('Inicializando dados de madeiras...');
-                        localStorage.setItem('woodData', JSON.stringify([
-                            { 
-                                name: "Angelim Vermelho", 
-                                price: 95000, 
-                                visible: true,
-                                quantidadeTora: 95.000,
-                                porcentagem: 50,
-                                quantidadeSerrada: 47.500
-                            },
-                            { name: "Angelim-Amargoso", price: 225.4383, visible: true, quantidadeTora: 0, quantidadeSerrada: 0 },
-                            { name: "Angelim-Pedra", price: 93.0246, visible: true, quantidadeTora: 0, quantidadeSerrada: 0 },
-                            { name: "Araracanga", price: 20.770, visible: true, quantidadeTora: 0, quantidadeSerrada: 0 },
-                            { name: "Cumaru Vermelho", price: 15.000, visible: true, quantidadeTora: 0, quantidadeSerrada: 0 },
-                            { name: "Fava-Orelha-de-Macaco", price: 117.888, visible: true, quantidadeTora: 0, quantidadeSerrada: 0 },
-                            { name: "Guariúba", price: 3.236, visible: true, quantidadeTora: 0, quantidadeSerrada: 0 },
-                            { name: "Jatobá", price: 134.928, visible: true, quantidadeTora: 0, quantidadeSerrada: 0 },
-                            { name: "Louro Tamaguare", price: 45.000, visible: true, quantidadeTora: 0, quantidadeSerrada: 0 },
-                            { name: "Mandioqueiro", price: 15.000, visible: true, quantidadeTora: 0, quantidadeSerrada: 0 },
-                            { name: "Maçaranduba", price: 16.054, visible: true, quantidadeTora: 0, quantidadeSerrada: 0 },
-                            { name: "Oiticica", price: 24.713, visible: true, quantidadeTora: 0, quantidadeSerrada: 0 },
-                            { name: "Orelha de Macaco", price: 21.502, visible: true, quantidadeTora: 0, quantidadeSerrada: 0 },
-                            { name: "Pequiá", price: 78.672, visible: true, quantidadeTora: 0, quantidadeSerrada: 0 },
-                            { name: "Quaruba-Cedro", price: 42.173, visible: true, quantidadeTora: 0, quantidadeSerrada: 0 },
-                            { name: "Quarubatinga", price: 80.629, visible: true, quantidadeTora: 0, quantidadeSerrada: 0 },
-                            { name: "Tanibuca", price: 62.714, visible: true, quantidadeTora: 0, quantidadeSerrada: 0 },
-                            { name: "Táxi", price: 75.000, visible: true, quantidadeTora: 0, quantidadeSerrada: 0 },
-                            { name: "Timborana", price: 35.000, visible: true, quantidadeTora: 0, quantidadeSerrada: 0 }
-                        ]));
-                    }
-
-                    if (!companySettings) {
-                        console.log('Inicializando configurações da empresa...');
-                        localStorage.setItem('companySettings', JSON.stringify({
-                            name: 'JN Madeiras',
-                            phone: '(91) 99131-1049',
-                            address: 'Rua Principal, 123 - Centro',
-                            city: 'Belém',
-                            state: 'PA',
-                            email: 'contato@jnmadeiras.com',
-                            logo: 'Logo JN.png'
-                        }));
-                    }
-                } catch (localStorageError) {
-                    console.log('localStorage não disponível, usando dados padrão');
-                }
-            } catch (error) {
-                console.error('Erro ao inicializar dados:', error);
-            }
         }
 
         function createWoodCards() {
@@ -778,14 +719,26 @@
             }
         }
 
-        // Função para atualizar os cards periodicamente
-        function startPeriodicUpdate() {
-            // Atualizar a cada 5 segundos
-            setInterval(() => {
-                console.log('Verificando atualizações...');
+        // Inicializar quando o documento estiver pronto
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM carregado, iniciando...');
+            try {
+                // Criar os cards
                 createWoodCards();
-            }, 5000);
-        }
+                
+                // Carregar logo e outras configurações
+                loadCompanyLogo();
+                loadQuotes();
+                updateNotificationCount();
+                
+                // Configurar atualização de notificações
+                setInterval(updateNotificationCount, 60000);
+                
+                console.log('Inicialização concluída com sucesso');
+            } catch (error) {
+                console.error('Erro durante a inicialização:', error);
+            }
+        });
 
         function checkPassword() {
             const senha = prompt('Digite a senha de acesso:');
@@ -836,33 +789,6 @@
                 alert('Por favor, digite seu e-mail.');
             }
         }
-
-        // Inicializar quando o documento estiver pronto
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('DOM carregado, iniciando...');
-            try {
-                // Inicializar dados primeiro
-                initializeData();
-                
-                // Depois criar os cards
-                createWoodCards();
-                
-                // Carregar logo e outras configurações
-                loadCompanyLogo();
-                loadQuotes();
-                updateNotificationCount();
-                
-                // Iniciar atualização periódica
-                startPeriodicUpdate();
-                
-                // Configurar atualização de notificações
-                setInterval(updateNotificationCount, 60000);
-                
-                console.log('Inicialização concluída com sucesso');
-            } catch (error) {
-                console.error('Erro durante a inicialização:', error);
-            }
-        });
     </script>
 </body>
 </html> 
