@@ -385,35 +385,56 @@
             const woodGrid = document.getElementById('woodGrid');
             woodGrid.innerHTML = '';
             
-            const savedData = localStorage.getItem('woodData');
-            const currentData = savedData ? JSON.parse(savedData) : woodData;
-            
-            currentData.forEach(wood => {
-                if (wood.visible !== false) {
-                    const card = document.createElement('div');
-                    card.className = 'wood-card';
-                    
-                    card.innerHTML = `
-                        <div class="wood-name">${wood.name}</div>
-                        <div class="wood-info">Em Tora: ${formatNumber(wood.quantidadeTora)} m³</div>
-                        <div class="wood-info">Serrada: ${formatNumber(wood.quantidadeSerrada)} m³</div>
-                        <div class="wood-price">${formatCurrency(wood.price)}</div>
-                    `;
-                    
-                    woodGrid.appendChild(card);
+            try {
+                // Tentar carregar dados do localStorage
+                const savedData = localStorage.getItem('woodData');
+                let currentData;
+                
+                if (savedData) {
+                    currentData = JSON.parse(savedData);
+                } else {
+                    // Se não houver dados no localStorage, usar os dados padrão
+                    currentData = woodData;
+                    // Salvar os dados padrão no localStorage
+                    localStorage.setItem('woodData', JSON.stringify(woodData));
                 }
-            });
+                
+                currentData.forEach(wood => {
+                    if (wood.visible !== false) {
+                        const card = document.createElement('div');
+                        card.className = 'wood-card';
+                        
+                        // Verificar se as propriedades existem antes de usar
+                        const quantidadeTora = wood.quantidadeTora || 0;
+                        const quantidadeSerrada = wood.quantidadeSerrada || 0;
+                        const price = wood.price || 0;
+                        
+                        card.innerHTML = `
+                            <div class="wood-name">${wood.name}</div>
+                            <div class="wood-info">Em Tora: ${formatNumber(quantidadeTora)} m³</div>
+                            <div class="wood-info">Serrada: ${formatNumber(quantidadeSerrada)} m³</div>
+                            <div class="wood-price">${formatCurrency(price)}</div>
+                        `;
+                        
+                        woodGrid.appendChild(card);
+                    }
+                });
 
-            // Carregar e exibir promoções
-            const promoText = localStorage.getItem('promoText');
-            const promoSection = document.getElementById('promoSection');
-            const promoContent = promoSection.querySelector('.promo-content');
-            
-            if (promoText && promoText.trim() !== '') {
-                promoContent.textContent = promoText;
-                promoSection.style.display = 'block';
-            } else {
-                promoSection.style.display = 'none';
+                // Carregar e exibir promoções
+                const promoText = localStorage.getItem('promoText');
+                const promoSection = document.getElementById('promoSection');
+                const promoContent = promoSection.querySelector('.promo-content');
+                
+                if (promoText && promoText.trim() !== '') {
+                    promoContent.textContent = promoText;
+                    promoSection.style.display = 'block';
+                } else {
+                    promoSection.style.display = 'none';
+                }
+            } catch (error) {
+                console.error('Erro ao criar cards de madeira:', error);
+                // Em caso de erro, mostrar uma mensagem amigável
+                woodGrid.innerHTML = '<div class="error-message">Erro ao carregar os dados. Por favor, recarregue a página.</div>';
             }
         }
 
@@ -471,6 +492,7 @@
         document.addEventListener('DOMContentLoaded', function() {
             console.log('DOM carregado, iniciando...');
             initializeData();
+            createWoodCards();
             loadCompanyLogo();
             loadQuotes();
             updateNotificationCount();
@@ -486,16 +508,32 @@
                 if (!woodData) {
                     console.log('Inicializando dados de madeiras...');
                     localStorage.setItem('woodData', JSON.stringify([
-                        { name: 'Angelim Vermelho', price: 95000, visible: true },
-                        { name: 'Jatobá', price: 134928, visible: true },
-                        { name: 'Ipê', price: 120000, visible: true },
-                        { name: 'Cumaru', price: 110000, visible: true },
-                        { name: 'Maçaranduba', price: 100000, visible: true },
-                        { name: 'Garapa', price: 90000, visible: true },
-                        { name: 'Cedro', price: 80000, visible: true },
-                        { name: 'Freijó', price: 75000, visible: true },
-                        { name: 'Sucupira', price: 85000, visible: true },
-                        { name: 'Peroba', price: 70000, visible: true }
+                        { 
+                            name: "Angelim Vermelho", 
+                            price: 95000, 
+                            visible: true,
+                            quantidadeTora: 95.000,
+                            porcentagem: 50,
+                            quantidadeSerrada: 47.500
+                        },
+                        { name: "Angelim-Amargoso", price: 225.4383, visible: true, quantidadeTora: 0, quantidadeSerrada: 0 },
+                        { name: "Angelim-Pedra", price: 93.0246, visible: true, quantidadeTora: 0, quantidadeSerrada: 0 },
+                        { name: "Araracanga", price: 20.770, visible: true, quantidadeTora: 0, quantidadeSerrada: 0 },
+                        { name: "Cumaru Vermelho", price: 15.000, visible: true, quantidadeTora: 0, quantidadeSerrada: 0 },
+                        { name: "Fava-Orelha-de-Macaco", price: 117.888, visible: true, quantidadeTora: 0, quantidadeSerrada: 0 },
+                        { name: "Guariúba", price: 3.236, visible: true, quantidadeTora: 0, quantidadeSerrada: 0 },
+                        { name: "Jatobá", price: 134.928, visible: true, quantidadeTora: 0, quantidadeSerrada: 0 },
+                        { name: "Louro Tamaguare", price: 45.000, visible: true, quantidadeTora: 0, quantidadeSerrada: 0 },
+                        { name: "Mandioqueiro", price: 15.000, visible: true, quantidadeTora: 0, quantidadeSerrada: 0 },
+                        { name: "Maçaranduba", price: 16.054, visible: true, quantidadeTora: 0, quantidadeSerrada: 0 },
+                        { name: "Oiticica", price: 24.713, visible: true, quantidadeTora: 0, quantidadeSerrada: 0 },
+                        { name: "Orelha de Macaco", price: 21.502, visible: true, quantidadeTora: 0, quantidadeSerrada: 0 },
+                        { name: "Pequiá", price: 78.672, visible: true, quantidadeTora: 0, quantidadeSerrada: 0 },
+                        { name: "Quaruba-Cedro", price: 42.173, visible: true, quantidadeTora: 0, quantidadeSerrada: 0 },
+                        { name: "Quarubatinga", price: 80.629, visible: true, quantidadeTora: 0, quantidadeSerrada: 0 },
+                        { name: "Tanibuca", price: 62.714, visible: true, quantidadeTora: 0, quantidadeSerrada: 0 },
+                        { name: "Táxi", price: 75.000, visible: true, quantidadeTora: 0, quantidadeSerrada: 0 },
+                        { name: "Timborana", price: 35.000, visible: true, quantidadeTora: 0, quantidadeSerrada: 0 }
                     ]));
                 }
 
