@@ -140,6 +140,27 @@
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
+        // Criar usuário admin automaticamente
+        async function createAdminUser() {
+            try {
+                const adminUser = {
+                    username: "admin",
+                    password: "admin123",
+                    role: "admin",
+                    name: "Administrador",
+                    email: "admin@jnmadeiras.com.br"
+                };
+                
+                await database.ref('users/admin').set(adminUser);
+                log('Usuário admin criado com sucesso');
+            } catch (error) {
+                log(`Erro ao criar usuário admin: ${error.message}`);
+            }
+        }
+
+        // Chamar a função quando a página carregar
+        createAdminUser();
+
         // Dados padrão
         const defaultWoodData = [
             {
@@ -224,6 +245,9 @@
             const password = document.getElementById('password').value;
 
             try {
+                showStatus('Tentando fazer login...');
+                log('Tentando fazer login com usuário: ' + username);
+                
                 const userSnapshot = await database.ref('users').child(username).once('value');
                 const user = userSnapshot.val();
 
@@ -231,11 +255,14 @@
                     document.getElementById('loginSection').style.display = 'none';
                     document.getElementById('adminSection').style.display = 'block';
                     showStatus('Login realizado com sucesso!');
+                    log('Login realizado com sucesso');
                 } else {
                     showStatus('Usuário ou senha inválidos', true);
+                    log('Tentativa de login falhou: credenciais inválidas');
                 }
             } catch (error) {
                 console.error('Erro ao fazer login:', error);
+                log(`Erro ao fazer login: ${error.message}`);
                 showStatus('Erro ao fazer login: ' + error.message, true);
             }
         });
