@@ -467,6 +467,55 @@
             }
         }
 
+        // Inicializar quando o documento estiver pronto
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM carregado, iniciando...');
+            initializeData();
+            loadCompanyLogo();
+            loadQuotes();
+            updateNotificationCount();
+            setInterval(updateNotificationCount, 60000);
+        });
+
+        function initializeData() {
+            try {
+                // Verificar se já existe dados no localStorage
+                const woodData = localStorage.getItem('woodData');
+                const companySettings = localStorage.getItem('companySettings');
+                
+                if (!woodData) {
+                    console.log('Inicializando dados de madeiras...');
+                    localStorage.setItem('woodData', JSON.stringify([
+                        { name: 'Angelim Vermelho', price: 95000, visible: true },
+                        { name: 'Jatobá', price: 134928, visible: true },
+                        { name: 'Ipê', price: 120000, visible: true },
+                        { name: 'Cumaru', price: 110000, visible: true },
+                        { name: 'Maçaranduba', price: 100000, visible: true },
+                        { name: 'Garapa', price: 90000, visible: true },
+                        { name: 'Cedro', price: 80000, visible: true },
+                        { name: 'Freijó', price: 75000, visible: true },
+                        { name: 'Sucupira', price: 85000, visible: true },
+                        { name: 'Peroba', price: 70000, visible: true }
+                    ]));
+                }
+
+                if (!companySettings) {
+                    console.log('Inicializando configurações da empresa...');
+                    localStorage.setItem('companySettings', JSON.stringify({
+                        name: 'JN Madeiras',
+                        phone: '(91) 99131-1049',
+                        address: 'Rua Principal, 123 - Centro',
+                        city: 'Belém',
+                        state: 'PA',
+                        email: 'contato@jnmadeiras.com',
+                        logo: 'Logo JN.png'
+                    }));
+                }
+            } catch (error) {
+                console.error('Erro ao inicializar dados:', error);
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', createWoodCards);
     </script>
 </body>
