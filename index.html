@@ -634,35 +634,60 @@
         };
 
         // Inicializar Firebase
-        firebase.initializeApp(firebaseConfig);
-        const database = firebase.database();
-        const analytics = firebase.analytics();
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+        const analytics = getAnalytics(app);
+        const woodRef = database.ref('woodData');
+        const promoRef = database.ref('promoText');
 
-        let woodData = [];
-        let promoText = '';
+        // Dados padrão
+        const defaultWoodData = [
+            {
+                name: "Eucalipto",
+                price: 1200,
+                quantidadeTora: 100,
+                porcentagem: 60,
+                quantidadeSerrada: 60,
+                visible: true
+            },
+            {
+                name: "Pinus",
+                price: 1500,
+                quantidadeTora: 80,
+                porcentagem: 65,
+                quantidadeSerrada: 52,
+                visible: true
+            }
+        ];
+
+        const defaultPromoText = "Ofertas especiais para compras em grande quantidade! Entre em contato para mais informações.";
+
+        // Variáveis globais
+        let woodData = defaultWoodData;
+        let promoText = defaultPromoText;
 
         // Função para carregar dados do Firebase
         function loadDataFromFirebase() {
-            const woodRef = database.ref('woodData');
-            const promoRef = database.ref('promoText');
-            const companySettingsRef = database.ref('companySettings');
-
-            // Escutar mudanças nos dados de madeira
+            console.log('Iniciando carregamento de dados do Firebase...');
+            
+            // Carregar dados de madeira
             woodRef.on('value', (snapshot) => {
-                woodData = snapshot.val() || [];
-                console.log('Dados carregados do Firebase:', woodData); // Log para debug
+                console.log('Dados recebidos do Firebase:', snapshot.val());
+                woodData = snapshot.val() || defaultWoodData;
+                console.log('Dados processados:', woodData);
                 createWoodCards();
-                // Registrar visualização de produtos
-                analytics.logEvent('view_products', {
-                    product_count: woodData.length
-                });
+            }, (error) => {
+                console.error('Erro ao carregar dados de madeira:', error);
+                woodData = defaultWoodData;
+                createWoodCards();
             });
 
             // Escutar mudanças no texto promocional
             promoRef.on('value', (snapshot) => {
-                promoText = snapshot.val() || '';
+                console.log('Texto promocional recebido:', snapshot.val());
+                promoText = snapshot.val() || defaultPromoText;
                 const promoSection = document.getElementById('promoSection');
-                if (promoText) {
+                if (promoSection) {
                     promoSection.innerHTML = `
                         <div class="promo-content">
                             <h3>Ofertas e Promoções</h3>
@@ -670,40 +695,45 @@
                         </div>
                     `;
                     promoSection.style.display = 'block';
-                } else {
-                    promoSection.style.display = 'none';
                 }
-            });
-
-            // Carregar configurações da empresa
-            companySettingsRef.once('value', (snapshot) => {
-                const settings = snapshot.val() || {};
-                if (settings.logo) {
-                    const logoImg = document.querySelector('.header-logo');
-                    if (logoImg) {
-                        logoImg.src = settings.logo;
-                    }
+            }, (error) => {
+                console.error('Erro ao carregar texto promocional:', error);
+                const promoSection = document.getElementById('promoSection');
+                if (promoSection) {
+                    promoSection.innerHTML = `
+                        <div class="promo-content">
+                            <h3>Ofertas e Promoções</h3>
+                            <p>${defaultPromoText}</p>
+                        </div>
+                    `;
+                    promoSection.style.display = 'block';
                 }
             });
         }
 
         // Função para criar cards de madeira
         function createWoodCards() {
+            console.log('Iniciando criação de cards...');
             const woodGrid = document.getElementById('woodGrid');
+            if (!woodGrid) {
+                console.error('Elemento woodGrid não encontrado');
+                return;
+            }
+            
             woodGrid.innerHTML = '';
-
-            console.log('Criando cards com dados:', woodData); // Log para debug
 
             if (!Array.isArray(woodData)) {
                 console.error('woodData não é um array:', woodData);
-                return;
+                woodData = defaultWoodData;
             }
+
+            console.log('Dados para criar cards:', woodData);
 
             // Ordenar os dados por nome
             woodData.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
 
             woodData.forEach((wood, index) => {
-                console.log(`Processando item ${index}:`, wood); // Log para debug
+                console.log(`Processando item ${index}:`, wood);
                 if (wood && wood.visible !== false) {
                     const card = document.createElement('div');
                     card.className = 'wood-card';
@@ -738,6 +768,7 @@
                     woodGrid.appendChild(card);
                 }
             });
+            console.log('Cards criados com sucesso');
         }
 
         // Função para formatar volume
@@ -760,6 +791,7 @@
 
         // Carregar dados quando a página carregar
         document.addEventListener('DOMContentLoaded', () => {
+            console.log('DOM carregado, iniciando carregamento de dados...');
             loadDataFromFirebase();
             // Registrar visualização da página
             analytics.logEvent('page_view', {
