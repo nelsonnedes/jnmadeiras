@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JN Madeiras - Orçamentos</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <title>JN Madeiras - Espécies de Madeira</title>
     <style>
         * {
             margin: 0;
@@ -24,420 +23,353 @@
         }
 
         .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            text-align: center;
             margin-bottom: 20px;
             padding: 20px;
             background-color: #2c1810;
             color: white;
             border-radius: 8px;
+            position: relative;
         }
 
-        .logo-container {
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header-buttons {
             display: flex;
-            align-items: center;
-            gap: 20px;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 15px;
         }
 
-        .logo {
-            width: 80px;
-            height: 80px;
-            object-fit: contain;
-        }
-
-        .company-info {
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-        }
-
-        .company-info h1 {
-            font-size: 1.8em;
-            margin: 0;
-        }
-
-        .company-info p {
-            font-size: 0.9em;
-            margin: 0;
-        }
-
-        .whatsapp-contact {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            background-color: #25D366;
+        .quote-button, .admin-button {
             padding: 10px 20px;
-            border-radius: 8px;
+            border-radius: 4px;
             text-decoration: none;
             color: white;
-            transition: background-color 0.3s;
-        }
-
-        .whatsapp-contact:hover {
-            background-color: #128C7E;
-        }
-
-        .whatsapp-contact i {
-            font-size: 1.5em;
-        }
-
-        .whatsapp-contact span {
-            font-size: 1.1em;
             font-weight: bold;
-        }
-
-        .back-button {
-            background-color: #4a3228;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 8px;
-            cursor: pointer;
             transition: background-color 0.3s;
-            text-decoration: none;
             display: flex;
             align-items: center;
             gap: 8px;
         }
 
-        .back-button:hover {
-            background-color: #5f422f;
+        .quote-button {
+            background-color: #28a745;
         }
 
-        .menu {
-            display: flex;
-            gap: 15px;
-            margin-top: 20px;
+        .quote-button:hover {
+            background-color: #218838;
         }
 
-        .menu-button {
-            background-color: #2c1810;
-            color: white;
-            border: none;
-            padding: 15px 30px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 1.1em;
-            transition: background-color 0.3s;
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .menu-button:hover {
-            background-color: #3d2319;
-        }
-
-        .menu-button i {
-            font-size: 1.2em;
-        }
-
-        .quotes-container {
-            margin-top: 30px;
-        }
-
-        .quotes-title {
-            color: #2c1810;
-            margin-bottom: 20px;
-            font-size: 1.5em;
-        }
-
-        .quotes-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 20px;
-        }
-
-        .quote-card {
-            background-color: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-
-        .quote-card h3 {
-            color: #2c1810;
-            margin-bottom: 10px;
-        }
-
-        .quote-info {
-            margin-bottom: 15px;
-        }
-
-        .quote-info p {
-            margin: 5px 0;
-            color: #666;
-        }
-
-        .quote-actions {
-            display: flex;
-            gap: 10px;
-        }
-
-        .action-button {
-            background-color: #2c1810;
-            color: white;
-            border: none;
-            padding: 8px 15px;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-            text-decoration: none;
-            font-size: 0.9em;
-        }
-
-        .action-button:hover {
-            background-color: #3d2319;
-        }
-
-        .action-button.edit {
+        .admin-button {
             background-color: #4a3228;
         }
 
-        .action-button.edit:hover {
+        .admin-button:hover {
             background-color: #5f422f;
         }
 
-        .action-button.delete {
-            background-color: #dc3545;
-        }
-
-        .action-button.delete:hover {
-            background-color: #c82333;
-        }
-
-        .notification-bell {
-            position: relative;
-            cursor: pointer;
-        }
-
-        .notification-count {
-            position: absolute;
-            top: -8px;
-            right: -8px;
-            background-color: #dc3545;
-            color: white;
-            border-radius: 50%;
-            padding: 2px 6px;
-            font-size: 0.8em;
-            min-width: 18px;
-            text-align: center;
-        }
-
-        .commercial-section {
-            margin-top: 30px;
-            background-color: white;
+        .promo-section {
+            background: linear-gradient(135deg, #2c1810 0%, #4a3228 100%);
             padding: 20px;
             border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-
-        .commercial-section h2 {
-            color: #2c1810;
-            margin-bottom: 15px;
-            font-size: 1.5em;
-        }
-
-        .commercial-section p {
-            color: #666;
-            line-height: 1.6;
-            margin-bottom: 15px;
-        }
-
-        .products-section {
-            margin-top: 30px;
-        }
-
-        .products-title {
-            color: #2c1810;
             margin-bottom: 20px;
-            font-size: 1.5em;
+            color: white;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
         }
 
-        .products-grid {
+        .promo-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 50%;
+            height: 100%;
+            background: linear-gradient(
+                90deg,
+                transparent,
+                rgba(255, 255, 255, 0.2),
+                transparent
+            );
+            animation: shine 3s infinite;
+        }
+
+        @keyframes shine {
+            to {
+                left: 100%;
+            }
+        }
+
+        .promo-content {
+            font-size: 1.2em;
+            line-height: 1.6;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+            white-space: pre-line;
+        }
+
+        .wood-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 20px;
         }
 
-        .product-card {
-            background-color: white;
+        .wood-card {
+            background: white;
             padding: 20px;
             border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
         }
 
-        .product-card h3 {
+        .wood-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .wood-name {
+            font-size: 1.2em;
             color: #2c1810;
             margin-bottom: 10px;
-        }
-
-        .product-price {
-            color: #25D366;
-            font-size: 1.2em;
             font-weight: bold;
-            margin-top: 10px;
         }
 
-        .product-description {
-            color: #666;
-            font-size: 0.9em;
+        .wood-info {
+            color: #4a4a4a;
+            font-size: 1.1em;
+            margin-bottom: 5px;
+        }
+
+        .wood-price {
+            color: #4a4a4a;
+            font-size: 1.1em;
             margin-top: 10px;
+            border-top: 1px solid #eee;
+            padding-top: 10px;
+        }
+
+        .price-value {
+            color: #2c1810;
+            font-weight: bold;
+        }
+
+        @media (max-width: 768px) {
+            .wood-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background-color: white;
+            padding: 30px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 400px;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+        }
+
+        .modal-content h2 {
+            color: #2c1810;
+            text-align: center;
+            margin-bottom: 25px;
+            font-size: 24px;
+            border-bottom: 2px solid #2c1810;
+            padding-bottom: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #2c1810;
+            font-weight: bold;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus {
+            border-color: #2c1810;
+            outline: none;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: flex-end;
+            margin-top: 25px;
+        }
+
+        .submit-button {
+            background-color: #2c1810;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            font-weight: bold;
+        }
+
+        .submit-button:hover {
+            background-color: #4a3228;
+        }
+
+        .cancel-button {
+            background-color: #6c757d;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            font-weight: bold;
+        }
+
+        .cancel-button:hover {
+            background-color: #5a6268;
+        }
+
+        .forgot-password {
+            text-align: center;
+            margin-top: 15px;
+        }
+
+        .forgot-password a {
+            color: #2c1810;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .forgot-password a:hover {
+            text-decoration: underline;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <div class="logo-container">
-                <img src="Logo JN.png" alt="JN Madeiras Logo" class="logo" id="companyLogo">
-                <div class="company-info">
-                    <h1>JN Madeiras</h1>
-                    <p>Qualidade e Tradição em Madeiras</p>
+            <h1>JN Madeiras</h1>
+            <div class="header-buttons">
+                <a href="orcamento.html" class="quote-button">
+                    <i class="fas fa-calculator"></i> Solicitar Orçamento
+                </a>
+                <button onclick="showPasswordModal()" class="admin-button">
+                    <i class="fas fa-user-lock"></i> Área Administrativa
+                </button>
+            </div>
+        </div>
+
+        <div id="promoSection" class="promo-section" style="display: none;">
+            <div class="promo-content"></div>
+        </div>
+
+        <div class="wood-grid" id="woodGrid"></div>
+
+        <!-- Modal de Senha -->
+        <div id="passwordModal" class="modal">
+            <div class="modal-content">
+                <h2><i class="fas fa-lock"></i> Acesso Administrativo</h2>
+                <div class="form-group">
+                    <label for="senha">Digite sua senha:</label>
+                    <input type="password" id="senha" required placeholder="Digite a senha de acesso">
+                </div>
+                <div class="modal-buttons">
+                    <button onclick="submitPassword()" class="submit-button">
+                        <i class="fas fa-sign-in-alt"></i> Acessar
+                    </button>
+                    <button onclick="closePasswordModal()" class="cancel-button">
+                        <i class="fas fa-times"></i> Cancelar
+                    </button>
+                </div>
+                <div class="forgot-password">
+                    <a href="#" onclick="showForgotPasswordModal()">Esqueceu a senha?</a>
                 </div>
             </div>
-            <div style="display: flex; gap: 15px; align-items: center;">
-                <a href="index.html" class="back-button">
-                    <i class="fas fa-arrow-left"></i>
-                    <span>Voltar</span>
-                </a>
-                <a href="https://wa.me/5591991311049" target="_blank" class="whatsapp-contact">
-                    <i class="fab fa-whatsapp"></i>
-                    <span>Fale Conosco</span>
-                </a>
-            </div>
         </div>
 
-        <div class="menu">
-            <a href="orcamento.html" class="menu-button">
-                <i class="fas fa-file-alt"></i>
-                <span>Solicitar Orçamento</span>
-            </a>
-            <a href="editar.html" class="menu-button">
-                <i class="fas fa-cog"></i>
-                <span>Área Administrativa</span>
-            </a>
-        </div>
-
-        <div class="quotes-container">
-            <h2 class="quotes-title">Orçamentos Recebidos</h2>
-            <div class="quotes-grid" id="quotesGrid">
-                <!-- Os orçamentos serão carregados aqui via JavaScript -->
-            </div>
-        </div>
-
-        <div class="commercial-section">
-            <h2>Sobre a JN Madeiras</h2>
-            <p>A JN Madeiras é referência em madeiras nobres de alta qualidade. Nossa empresa oferece uma ampla variedade de espécies de madeira, todas com procedência certificada e preços competitivos. Trabalhamos com madeiras nobres como Angelim Vermelho, Jatobá, Cumaru, Ipê e muitas outras.</p>
-            <p>Nossa missão é fornecer produtos de excelência, garantindo a satisfação total de nossos clientes. Com anos de experiência no mercado, construímos uma reputação sólida baseada na qualidade e confiança.</p>
-        </div>
-
-        <div class="products-section">
-            <h2 class="products-title">Nossas Madeiras</h2>
-            <div class="products-grid" id="productsGrid">
-                <!-- Os produtos serão carregados aqui via JavaScript -->
+        <!-- Modal de Recuperação de Senha -->
+        <div id="forgotPasswordModal" class="modal">
+            <div class="modal-content">
+                <h2><i class="fas fa-key"></i> Recuperar Senha</h2>
+                <div class="form-group">
+                    <label for="email">E-mail cadastrado:</label>
+                    <input type="email" id="email" required placeholder="Digite seu e-mail">
+                </div>
+                <div class="modal-buttons">
+                    <button onclick="recoverPassword()" class="submit-button">
+                        <i class="fas fa-paper-plane"></i> Enviar
+                    </button>
+                    <button onclick="closeForgotPasswordModal()" class="cancel-button">
+                        <i class="fas fa-times"></i> Cancelar
+                    </button>
+                </div>
             </div>
         </div>
     </div>
 
     <script>
-        // Inicializar quando o documento estiver pronto
-        document.addEventListener('DOMContentLoaded', () => {
-            initializeData();
-            loadCompanyLogo();
-            loadQuotes();
-            loadProducts();
-        });
+        const woodData = [
+            { 
+                name: "Angelim Vermelho", 
+                price: 95000, 
+                visible: true,
+                quantidadeTora: 95.000,
+                porcentagem: 50,
+                quantidadeSerrada: 47.500
+            },
+            { name: "Angelim-Amargoso", price: 225.4383, visible: true },
+            { name: "Angelim-Pedra", price: 93.0246, visible: true },
+            { name: "Araracanga", price: 20.770, visible: true },
+            { name: "Cumaru Vermelho", price: 15.000, visible: true },
+            { name: "Fava-Orelha-de-Macaco", price: 117.888, visible: true },
+            { name: "Guariúba", price: 3.236, visible: true },
+            { name: "Jatobá", price: 134.928, visible: true },
+            { name: "Louro Tamaguare", price: 45.000, visible: true },
+            { name: "Mandioqueiro", price: 15.000, visible: true },
+            { name: "Maçaranduba", price: 16.054, visible: true },
+            { name: "Oiticica", price: 24.713, visible: true },
+            { name: "Orelha de Macaco", price: 21.502, visible: true },
+            { name: "Pequiá", price: 78.672, visible: true },
+            { name: "Quaruba-Cedro", price: 42.173, visible: true },
+            { name: "Quarubatinga", price: 80.629, visible: true },
+            { name: "Tanibuca", price: 62.714, visible: true },
+            { name: "Táxi", price: 75.000, visible: true },
+            { name: "Timborana", price: 35.000, visible: true }
+        ];
 
-        function initializeData() {
-            // Verificar se já existe dados de madeira
-            if (!localStorage.getItem('woodData')) {
-                const woodData = [
-                    { name: 'Angelim Vermelho', price: 95000, visible: true, description: 'Madeira nobre de alta resistência e durabilidade' },
-                    { name: 'Jatobá', price: 134928, visible: true, description: 'Excelente para móveis e acabamentos' },
-                    { name: 'Cumaru', price: 120000, visible: true, description: 'Ideal para decks e áreas externas' },
-                    { name: 'Ipê', price: 150000, visible: true, description: 'Madeira de lei com alta resistência' },
-                    { name: 'Maçaranduba', price: 130000, visible: true, description: 'Perfeita para móveis e estruturas' },
-                    { name: 'Cedro', price: 80000, visible: true, description: 'Leve e resistente, ótima para acabamentos' },
-                    { name: 'Freijó', price: 90000, visible: true, description: 'Excelente para móveis e painéis' },
-                    { name: 'Sucupira', price: 110000, visible: true, description: 'Ideal para estruturas e móveis' },
-                    { name: 'Grapia', price: 95000, visible: true, description: 'Ótima para móveis e acabamentos' },
-                    { name: 'Peroba', price: 100000, visible: true, description: 'Madeira nobre com excelente durabilidade' }
-                ];
-                localStorage.setItem('woodData', JSON.stringify(woodData));
-            }
-
-            // Verificar se já existe configurações da empresa
-            if (!localStorage.getItem('companySettings')) {
-                const settings = {
-                    name: 'JN Madeiras',
-                    phone: '(91) 99131-1049',
-                    email: 'contato@jnmadeiras.com.br',
-                    address: 'Rua Principal, 123 - Centro',
-                    city: 'Belém',
-                    state: 'PA',
-                    logo: 'Logo JN.png'
-                };
-                localStorage.setItem('companySettings', JSON.stringify(settings));
-            }
-        }
-
-        function loadCompanyLogo() {
-            const settings = JSON.parse(localStorage.getItem('companySettings') || '{}');
-            const logoElement = document.getElementById('companyLogo');
-            
-            if (settings.logo) {
-                logoElement.src = settings.logo;
-                logoElement.style.display = 'block';
-            } else {
-                logoElement.style.display = 'none';
-            }
-        }
-
-        function loadQuotes() {
-            const quotesGrid = document.getElementById('quotesGrid');
-            const quotes = JSON.parse(localStorage.getItem('orcamentos') || '[]');
-            
-            quotesGrid.innerHTML = '';
-            
-            quotes.forEach((quote, index) => {
-                const card = document.createElement('div');
-                card.className = 'quote-card';
-                
-                const date = new Date(quote.data).toLocaleDateString('pt-BR');
-                
-                card.innerHTML = `
-                    <h3>${quote.nome}</h3>
-                    <div class="quote-info">
-                        <p><strong>Data:</strong> ${date}</p>
-                        <p><strong>Telefone:</strong> ${quote.telefone}</p>
-                        <p><strong>Estado:</strong> ${quote.estado}</p>
-                        <p><strong>Cidade:</strong> ${quote.cidade}</p>
-                        <p><strong>Status:</strong> ${quote.status}</p>
-                    </div>
-                    <div class="quote-actions">
-                        <a href="editar.html?id=${index}" class="action-button edit">
-                            <i class="fas fa-edit"></i> Editar
-                        </a>
-                        <button onclick="deleteQuote(${index})" class="action-button delete">
-                            <i class="fas fa-trash"></i> Excluir
-                        </button>
-                    </div>
-                `;
-                
-                quotesGrid.appendChild(card);
+        function formatNumber(number) {
+            return number.toLocaleString('pt-BR', {
+                minimumFractionDigits: 3,
+                maximumFractionDigits: 3
             });
-        }
-
-        function deleteQuote(index) {
-            if (confirm('Tem certeza que deseja excluir este orçamento?')) {
-                const quotes = JSON.parse(localStorage.getItem('orcamentos') || '[]');
-                quotes.splice(index, 1);
-                localStorage.setItem('orcamentos', JSON.stringify(quotes));
-                loadQuotes();
-            }
         }
 
         function formatCurrency(value) {
@@ -449,27 +381,93 @@
             }).format(value);
         }
 
-        function loadProducts() {
-            const productsGrid = document.getElementById('productsGrid');
-            const woodData = JSON.parse(localStorage.getItem('woodData') || '[]');
+        function createWoodCards() {
+            const woodGrid = document.getElementById('woodGrid');
+            woodGrid.innerHTML = '';
             
-            productsGrid.innerHTML = '';
+            const savedData = localStorage.getItem('woodData');
+            const currentData = savedData ? JSON.parse(savedData) : woodData;
             
-            woodData.forEach(wood => {
-                if (wood.visible) {
+            currentData.forEach(wood => {
+                if (wood.visible !== false) {
                     const card = document.createElement('div');
-                    card.className = 'product-card';
+                    card.className = 'wood-card';
                     
                     card.innerHTML = `
-                        <h3>${wood.name}</h3>
-                        <p class="product-description">${wood.description}</p>
-                        <p class="product-price">${formatCurrency(wood.price)}</p>
+                        <div class="wood-name">${wood.name}</div>
+                        <div class="wood-info">Em Tora: ${formatNumber(wood.quantidadeTora)} m³</div>
+                        <div class="wood-info">Serrada: ${formatNumber(wood.quantidadeSerrada)} m³</div>
+                        <div class="wood-price">${formatCurrency(wood.price)}</div>
                     `;
                     
-                    productsGrid.appendChild(card);
+                    woodGrid.appendChild(card);
                 }
             });
+
+            // Carregar e exibir promoções
+            const promoText = localStorage.getItem('promoText');
+            const promoSection = document.getElementById('promoSection');
+            const promoContent = promoSection.querySelector('.promo-content');
+            
+            if (promoText && promoText.trim() !== '') {
+                promoContent.textContent = promoText;
+                promoSection.style.display = 'block';
+            } else {
+                promoSection.style.display = 'none';
+            }
         }
+
+        function checkPassword() {
+            const senha = prompt('Digite a senha de acesso:');
+            if (senha === '123456') {
+                return true;
+            } else {
+                alert('Senha incorreta!');
+                return false;
+            }
+        }
+
+        function showPasswordModal() {
+            const modal = document.getElementById('passwordModal');
+            modal.style.display = 'block';
+        }
+
+        function closePasswordModal() {
+            const modal = document.getElementById('passwordModal');
+            modal.style.display = 'none';
+        }
+
+        function submitPassword() {
+            const senha = document.getElementById('senha').value;
+            if (senha === '20292029') {
+                window.location.href = 'editar.html';
+            } else {
+                alert('Senha incorreta!');
+            }
+        }
+
+        function showForgotPasswordModal() {
+            closePasswordModal();
+            const modal = document.getElementById('forgotPasswordModal');
+            modal.style.display = 'block';
+        }
+
+        function closeForgotPasswordModal() {
+            const modal = document.getElementById('forgotPasswordModal');
+            modal.style.display = 'none';
+        }
+
+        function recoverPassword() {
+            const email = document.getElementById('email').value;
+            if (email) {
+                alert('Um e-mail com instruções para recuperar sua senha foi enviado.');
+                closeForgotPasswordModal();
+            } else {
+                alert('Por favor, digite seu e-mail.');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', createWoodCards);
     </script>
 </body>
 </html> 
