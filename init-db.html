@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inicializar Banco de Dados</title>
+    <title>Inicializar Banco de Dados - JN Madeiras</title>
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-database-compat.js"></script>
@@ -13,6 +13,22 @@
             max-width: 800px;
             margin: 20px auto;
             padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .header img {
+            height: 50px;
         }
         .status {
             margin: 20px 0;
@@ -56,42 +72,55 @@
         }
         .login-form {
             max-width: 400px;
-            margin: 20px auto;
-            padding: 20px;
-            background-color: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin: 0 auto;
         }
-        .hidden {
-            display: none;
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
         }
     </style>
 </head>
 <body>
-    <div id="loginSection" class="login-form">
-        <h2>Login Administrativo</h2>
-        <form id="loginForm">
-            <div class="form-group">
-                <label for="email">E-mail:</label>
-                <input type="email" id="email" required>
-            </div>
-            <div class="form-group">
-                <label for="password">Senha:</label>
-                <input type="password" id="password" required>
-            </div>
-            <button type="submit" class="btn">Entrar</button>
-        </form>
-    </div>
-
-    <div id="adminSection" class="hidden">
-        <h1>Inicializar Banco de Dados</h1>
-        <div>
-            <button onclick="initializeDatabase()">Inicializar Banco de Dados</button>
-            <button class="btn-danger" onclick="clearDatabase()">Limpar Banco de Dados</button>
-            <button class="btn-danger" onclick="logout()">Sair</button>
+    <div class="container">
+        <div class="header">
+            <img src="Logo JN.png" alt="JN Madeiras">
+            <h1>Inicializar Banco de Dados</h1>
         </div>
-        <div id="status" class="status"></div>
-        <div id="console" class="console"></div>
+
+        <div id="loginSection">
+            <h2>Login Administrativo</h2>
+            <form id="loginForm" class="login-form">
+                <div class="form-group">
+                    <label for="username">E-mail:</label>
+                    <input type="text" id="username" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Senha:</label>
+                    <input type="password" id="password" required>
+                </div>
+                <button type="submit">Entrar</button>
+            </form>
+        </div>
+
+        <div id="adminSection" style="display: none;">
+            <div>
+                <button onclick="initializeDatabase()">Inicializar Banco de Dados</button>
+                <button class="btn-danger" onclick="clearDatabase()">Limpar Banco de Dados</button>
+                <button class="btn-danger" onclick="logout()">Sair</button>
+            </div>
+            <div id="status" class="status"></div>
+            <div id="console" class="console"></div>
+        </div>
     </div>
 
     <script>
@@ -110,7 +139,6 @@
         // Inicializar Firebase
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
-        const auth = firebase.auth();
 
         // Dados padrão
         const defaultWoodData = [
@@ -182,6 +210,35 @@
             consoleDiv.innerHTML += `[${timestamp}] ${message}<br>`;
             consoleDiv.scrollTop = consoleDiv.scrollHeight;
         }
+
+        function logout() {
+            document.getElementById('loginSection').style.display = 'block';
+            document.getElementById('adminSection').style.display = 'none';
+            document.getElementById('loginForm').reset();
+        }
+
+        // Login
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            try {
+                const userSnapshot = await database.ref('users').child(username).once('value');
+                const user = userSnapshot.val();
+
+                if (user && user.password === password) {
+                    document.getElementById('loginSection').style.display = 'none';
+                    document.getElementById('adminSection').style.display = 'block';
+                    showStatus('Login realizado com sucesso!');
+                } else {
+                    showStatus('Usuário ou senha inválidos', true);
+                }
+            } catch (error) {
+                console.error('Erro ao fazer login:', error);
+                showStatus('Erro ao fazer login: ' + error.message, true);
+            }
+        });
 
         async function clearDatabase() {
             try {
@@ -300,62 +357,6 @@
             log(`Código do erro: ${error.code}`);
             showStatus('Erro de conexão com o Firebase: ' + error.message, true);
         });
-
-        // Verificar estado de autenticação
-        auth.onAuthStateChanged((user) => {
-            if (user) {
-                document.getElementById('loginSection').classList.add('hidden');
-                document.getElementById('adminSection').classList.remove('hidden');
-                log('Usuário autenticado: ' + user.email);
-            } else {
-                document.getElementById('loginSection').classList.remove('hidden');
-                document.getElementById('adminSection').classList.add('hidden');
-                log('Usuário não autenticado');
-            }
-        });
-
-        // Função de login
-        document.getElementById('loginForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-
-            try {
-                showStatus('Tentando fazer login...');
-                log('Tentando fazer login com: ' + email);
-                
-                const userCredential = await auth.signInWithEmailAndPassword(email, password);
-                const user = userCredential.user;
-                
-                // Verificar se o usuário é admin
-                const userSnapshot = await database.ref('users').child(user.uid).once('value');
-                const userData = userSnapshot.val();
-                
-                if (userData && userData.role === 'admin') {
-                    log('Login bem sucedido como administrador');
-                    showStatus('Login realizado com sucesso!');
-                } else {
-                    await auth.signOut();
-                    throw new Error('Usuário não tem permissão de administrador');
-                }
-            } catch (error) {
-                console.error('Erro no login:', error);
-                log('Erro no login: ' + error.message);
-                showStatus('Erro no login: ' + error.message, true);
-            }
-        });
-
-        // Função de logout
-        function logout() {
-            auth.signOut().then(() => {
-                log('Logout realizado com sucesso');
-                showStatus('Logout realizado com sucesso!');
-            }).catch((error) => {
-                console.error('Erro no logout:', error);
-                log('Erro no logout: ' + error.message);
-                showStatus('Erro no logout: ' + error.message, true);
-            });
-        }
     </script>
 </body>
 </html> 
