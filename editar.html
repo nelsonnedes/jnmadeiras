@@ -677,18 +677,52 @@
             background-color: #f8d7da;
             color: #721c24;
         }
+
+        .notification-icon {
+            position: relative;
+            margin-left: 20px;
+        }
+
+        .notification-link {
+            font-size: 24px;
+            text-decoration: none;
+            color: white;
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background-color: #ff4444;
+            color: white;
+            border-radius: 50%;
+            padding: 2px 6px;
+            font-size: 12px;
+            min-width: 18px;
+            text-align: center;
+        }
+
+        .header-buttons {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="admin-header">
-            <button class="menu-icon" onclick="toggleSidebar()">
-                <i class="fas fa-bars"></i>
-            </button>
-            <h1>JN Madeiras</h1>
-            <div class="notification-bell" onclick="showQuotes()">
-                <i class="fas fa-bell"></i>
-                <span class="notification-count" id="notificationCount">0</span>
+        <div class="header">
+            <img src="Logo JN.png" alt="JN Madeiras" style="height: 50px; margin-bottom: 10px;">
+            <h1>Gerenciar Produtos</h1>
+            <div class="header-buttons">
+                <a href="index.html" class="back-button">Voltar para a Página Inicial</a>
+                <div class="notification-icon">
+                    <a href="orcamentos.html" class="notification-link">
+                        🔔
+                        <span id="notificationBadge" class="notification-badge" style="display: none;">0</span>
+                    </a>
+                </div>
             </div>
         </div>
 
@@ -942,6 +976,7 @@
         const database = firebase.database();
         const woodRef = database.ref('woodData');
         const promoRef = database.ref('promoText');
+        const quotesRef = database.ref('quotes');
 
         let woodData = [];
         let promoText = '';
@@ -1592,10 +1627,27 @@
             }
         }
 
+        // Verificar novos orçamentos
+        function checkNewQuotes() {
+            quotesRef.on('value', (snapshot) => {
+                const quotes = snapshot.val() || {};
+                const pendingQuotes = Object.values(quotes).filter(quote => quote.status === 'pendente');
+                
+                const notificationBadge = document.getElementById('notificationBadge');
+                if (pendingQuotes.length > 0) {
+                    notificationBadge.textContent = pendingQuotes.length;
+                    notificationBadge.style.display = 'block';
+                } else {
+                    notificationBadge.style.display = 'none';
+                }
+            });
+        }
+
         // Inicialização
         document.addEventListener('DOMContentLoaded', () => {
             loadWoodData();
             loadPromoText();
+            checkNewQuotes();
             updateNotificationCount();
             // Verificar novas notificações a cada minuto
             setInterval(updateNotificationCount, 60000);
