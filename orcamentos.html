@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciar Orçamentos - JN Madeiras</title>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-database-compat.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+
+        body {
+            background-color: #f5f5f5;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 20px;
+            background-color: #2c1810;
+            color: white;
+            border-radius: 8px;
+        }
+
+        .header h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .back-button {
+            display: inline-block;
+            background-color: #4a3228;
+            color: white;
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            margin-top: 10px;
+            transition: background-color 0.3s;
+        }
+
+        .back-button:hover {
+            background-color: #5f422f;
+        }
+
+        .quotes-table {
+            width: 100%;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .quotes-table th,
+        .quotes-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .quotes-table th {
+            background-color: #2c1810;
+            color: white;
+        }
+
+        .quotes-table tr:hover {
+            background-color: #f5f5f5;
+        }
+
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+
+        .status-pending {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+
+        .status-approved {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .status-rejected {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        .action-button {
+            background-color: #2c1810;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 5px;
+            transition: background-color 0.3s;
+        }
+
+        .action-button:hover {
+            background-color: #4a3228;
+        }
+
+        .status {
+            margin: 20px 0;
+            padding: 10px;
+            border-radius: 4px;
+        }
+
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 600px;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-header h2 {
+            color: #2c1810;
+            margin: 0;
+        }
+
+        .close-button {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #666;
+        }
+
+        .quote-details {
+            margin-bottom: 20px;
+        }
+
+        .quote-details p {
+            margin: 5px 0;
+        }
+
+        .modal-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Gerenciar Orçamentos</h1>
+            <a href="admin.html" class="back-button">Voltar para o Painel</a>
+        </div>
+
+        <table class="quotes-table">
+            <thead>
+                <tr>
+                    <th>Data</th>
+                    <th>Cliente</th>
+                    <th>Produto</th>
+                    <th>Quantidade</th>
+                    <th>Status</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody id="quotesTableBody">
+                <!-- Dados serão inseridos aqui via JavaScript -->
+            </tbody>
+        </table>
+
+        <div id="status" class="status"></div>
+    </div>
+
+    <!-- Modal de Detalhes -->
+    <div id="quoteModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Detalhes do Orçamento</h2>
+                <button class="close-button" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="quote-details" id="quoteDetails">
+                <!-- Detalhes serão inseridos aqui via JavaScript -->
+            </div>
+            <div class="modal-buttons">
+                <button class="action-button" onclick="updateQuoteStatus('aprovado')">Aprovar</button>
+                <button class="action-button" onclick="updateQuoteStatus('rejeitado')">Rejeitar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuração do Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyBd1MS-izKfE6Y6QTH_3-giQzZz6FraBkI",
+            authDomain: "comercial-5bc01.firebaseapp.com",
+            projectId: "comercial-5bc01",
+            storageBucket: "comercial-5bc01.firebasestorage.app",
+            messagingSenderId: "956944566020",
+            appId: "1:956944566020:web:dc3e58cba5afcc6e9b7251",
+            measurementId: "G-RF6Y1FZBM9",
+            databaseURL: "https://comercial-5bc01-default-rtdb.firebaseio.com"
+        };
+
+        // Inicializar Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        const quotesRef = database.ref('quotes');
+
+        let currentQuoteId = null;
+
+        function showStatus(message, isError = false) {
+            const statusDiv = document.getElementById('status');
+            statusDiv.textContent = message;
+            statusDiv.className = 'status ' + (isError ? 'error' : 'success');
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('pt-BR', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        function formatVolume(value) {
+            return new Intl.NumberFormat('pt-BR', {
+                minimumFractionDigits: 3,
+                maximumFractionDigits: 3
+            }).format(value) + ' m³';
+        }
+
+        function loadQuotes() {
+            quotesRef.on('value', (snapshot) => {
+                const quotes = snapshot.val() || {};
+                const tbody = document.getElementById('quotesTableBody');
+                tbody.innerHTML = '';
+
+                Object.entries(quotes).forEach(([id, quote]) => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${formatDate(quote.date)}</td>
+                        <td>${quote.name}</td>
+                        <td>${quote.woodType}</td>
+                        <td>${formatVolume(quote.quantity)}</td>
+                        <td><span class="status-badge status-${quote.status}">${quote.status}</span></td>
+                        <td>
+                            <button class="action-button" onclick="showQuoteDetails('${id}')">Ver Detalhes</button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            });
+        }
+
+        function showQuoteDetails(quoteId) {
+            currentQuoteId = quoteId;
+            const modal = document.getElementById('quoteModal');
+            const details = document.getElementById('quoteDetails');
+
+            quotesRef.child(quoteId).once('value', (snapshot) => {
+                const quote = snapshot.val();
+                details.innerHTML = `
+                    <p><strong>Data:</strong> ${formatDate(quote.date)}</p>
+                    <p><strong>Cliente:</strong> ${quote.name}</p>
+                    <p><strong>E-mail:</strong> ${quote.email}</p>
+                    <p><strong>Telefone:</strong> ${quote.phone}</p>
+                    <p><strong>Produto:</strong> ${quote.woodType}</p>
+                    <p><strong>Quantidade:</strong> ${formatVolume(quote.quantity)}</p>
+                    <p><strong>Mensagem:</strong> ${quote.message || 'Nenhuma mensagem adicional.'}</p>
+                `;
+                modal.style.display = 'block';
+            });
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('quoteModal');
+            modal.style.display = 'none';
+            currentQuoteId = null;
+        }
+
+        function updateQuoteStatus(status) {
+            if (!currentQuoteId) return;
+
+            quotesRef.child(currentQuoteId).update({
+                status: status,
+                updatedAt: new Date().toISOString()
+            })
+            .then(() => {
+                showStatus(`Orçamento ${status} com sucesso!`);
+                closeModal();
+            })
+            .catch(error => {
+                console.error('Erro ao atualizar status:', error);
+                showStatus('Erro ao atualizar status do orçamento.', true);
+            });
+        }
+
+        // Fechar modal ao clicar fora
+        window.onclick = function(event) {
+            const modal = document.getElementById('quoteModal');
+            if (event.target === modal) {
+                closeModal();
+            }
+        }
+
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', () => {
+            // Verificar permissões de acesso
+            const isAdmin = localStorage.getItem('isAdmin') === 'true';
+            if (!isAdmin) {
+                window.location.href = 'index.html';
+                return;
+            }
+
+            loadQuotes();
+        });
+    </script>
+</body>
+</html> 

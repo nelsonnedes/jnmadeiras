@@ -3,7 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JN Madeiras - Solicitar Orçamento</title>
+    <title>Solicitar Orçamento - JN Madeiras</title>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-database-compat.js"></script>
     <style>
         * {
             margin: 0;
@@ -18,14 +21,12 @@
         }
 
         .container {
-            max-width: 1200px;
+            max-width: 800px;
             margin: 0 auto;
         }
 
         .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            text-align: center;
             margin-bottom: 20px;
             padding: 20px;
             background-color: #2c1810;
@@ -33,104 +34,31 @@
             border-radius: 8px;
         }
 
-        .logo-container {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-        }
-
-        .logo {
-            width: 80px;
-            height: 80px;
-            object-fit: contain;
-        }
-
-        .company-info {
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-        }
-
-        .company-info h1 {
-            font-size: 1.8em;
-            margin: 0;
-        }
-
-        .company-info p {
-            font-size: 0.9em;
-            margin: 0;
-        }
-
-        .whatsapp-contact {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            background-color: #25D366;
-            padding: 10px 20px;
-            border-radius: 8px;
-            text-decoration: none;
-            color: white;
-            transition: background-color 0.3s;
-        }
-
-        .whatsapp-contact:hover {
-            background-color: #128C7E;
-        }
-
-        .whatsapp-contact i {
-            font-size: 1.5em;
-        }
-
-        .whatsapp-contact span {
-            font-size: 1.1em;
-            font-weight: bold;
+        .header h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
         }
 
         .back-button {
+            display: inline-block;
             background-color: #4a3228;
             color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: background-color 0.3s;
             text-decoration: none;
-            display: flex;
-            align-items: center;
-            gap: 8px;
+            padding: 10px 20px;
+            border-radius: 4px;
+            margin-top: 10px;
+            transition: background-color 0.3s;
         }
 
         .back-button:hover {
             background-color: #5f422f;
         }
 
-        .menu {
-            position: absolute;
-            right: 20px;
-            top: 20px;
-        }
-
-        .menu-button {
-            background-color: #4a3228;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-
-        .menu-button:hover {
-            background-color: #5f422f;
-        }
-
         .form-container {
             background: white;
-            padding: 40px;
+            padding: 20px;
             border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            max-width: 1200px;
-            margin: 0 auto;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
 
         .form-group {
@@ -139,338 +67,218 @@
 
         .form-group label {
             display: block;
-            margin-bottom: 8px;
+            margin-bottom: 5px;
             color: #2c1810;
             font-weight: bold;
         }
 
-        .form-group input,
-        .form-group select,
-        .form-group textarea {
+        .form-group input, .form-group select, .form-group textarea {
             width: 100%;
             padding: 10px;
             border: 1px solid #ddd;
             border-radius: 4px;
-            font-size: 1em;
+            font-size: 16px;
         }
 
         .form-group textarea {
-            min-height: 150px;
+            height: 100px;
             resize: vertical;
-        }
-
-        .suggestion-box {
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: 4px;
-            margin-bottom: 20px;
-            border-left: 4px solid #2c1810;
-        }
-
-        .suggestion-box h3 {
-            color: #2c1810;
-            margin-bottom: 10px;
-        }
-
-        .suggestion-box p {
-            color: #666;
-            margin-bottom: 5px;
         }
 
         .submit-button {
             background-color: #2c1810;
             color: white;
             border: none;
-            padding: 15px 30px;
+            padding: 12px 24px;
             border-radius: 4px;
             cursor: pointer;
-            font-size: 1.1em;
+            font-size: 16px;
+            width: 100%;
             transition: background-color 0.3s;
-            display: block;
-            margin: 30px auto 0;
         }
 
         .submit-button:hover {
             background-color: #4a3228;
         }
 
-        .form-row {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 30px;
+        .status {
+            margin: 20px 0;
+            padding: 10px;
+            border-radius: 4px;
         }
 
-        @media (max-width: 768px) {
-            .form-row {
-                grid-template-columns: 1fr;
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .loading::after {
+            content: '';
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #2c1810;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
             }
-        }
-
-        .species-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            gap: 15px;
-            margin-top: 15px;
-        }
-
-        .species-item {
-            background: white;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            padding: 8px;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            transition: all 0.3s ease;
-            font-size: 0.9em;
-        }
-
-        .species-item:hover {
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            transform: translateY(-2px);
-        }
-
-        .species-item input[type="checkbox"] {
-            width: 16px;
-            height: 16px;
-            cursor: pointer;
-        }
-
-        .species-item label {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            width: 100%;
-            padding: 8px;
-            cursor: pointer;
-            border-radius: 4px;
-            transition: background-color 0.3s;
-        }
-
-        .species-item label:hover {
-            background-color: #f5f5f5;
-        }
-
-        .species-item .price {
-            color: #2c1810;
-            font-weight: bold;
-            margin-left: 10px;
-        }
-
-        .species-item input[type="checkbox"] {
-            margin-right: 10px;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <div class="logo-container">
-                <img src="logo.png" alt="JN Madeiras Logo" class="logo" id="companyLogo">
-                <div class="company-info">
-                    <h1>JN Madeiras</h1>
-                    <p>Qualidade e Tradição em Madeiras</p>
-                </div>
-            </div>
-            <div style="display: flex; gap: 15px; align-items: center;">
-                <a href="index.html" class="back-button">
-                    <i class="fas fa-arrow-left"></i>
-                    <span>Voltar</span>
-                </a>
-                <a href="https://wa.me/5591991311049" target="_blank" class="whatsapp-contact">
-                    <i class="fab fa-whatsapp"></i>
-                    <span>Fale Conosco</span>
-                </a>
-            </div>
+            <h1>Solicitar Orçamento</h1>
+            <a href="index.html" class="back-button">Voltar para a Página Inicial</a>
         </div>
 
         <div class="form-container">
-            <form id="orcamentoForm" onsubmit="submitForm(event)">
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="nome">Nome:</label>
-                        <input type="text" id="nome" name="nome" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="telefone">Telefone:</label>
-                        <input type="tel" id="telefone" name="telefone" required
-                               pattern="^\(\d{2}\) \d{5}-\d{4}$" 
-                               placeholder="(00) 00000-0000"
-                               onkeyup="formatarTelefone(this)">
-                    </div>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="estado">Estado:</label>
-                        <input type="text" id="estado" name="estado" required 
-                               placeholder="Digite a sigla do estado (ex: SP, RJ, MG)"
-                               maxlength="2" style="text-transform: uppercase;">
-                    </div>
-                    <div class="form-group">
-                        <label for="cidade">Cidade:</label>
-                        <input type="text" id="cidade" name="cidade" required 
-                               placeholder="Digite o nome da cidade">
-                    </div>
+            <form id="quoteForm">
+                <div class="form-group">
+                    <label for="woodType">Tipo de Madeira:</label>
+                    <select id="woodType" required>
+                        <option value="">Selecione o tipo de madeira</option>
+                    </select>
                 </div>
 
                 <div class="form-group">
-                    <label for="species">Espécies de Madeira:</label>
-                    <div id="speciesGrid" class="species-grid">
-                        <!-- As espécies serão carregadas aqui via JavaScript -->
-                    </div>
-                    <input type="hidden" id="selectedSpecies" name="selectedSpecies">
+                    <label for="quantity">Quantidade (m³):</label>
+                    <input type="number" id="quantity" step="0.001" required>
                 </div>
 
                 <div class="form-group">
-                    <label for="pedido">Detalhes do Pedido:</label>
-                    <textarea id="pedido" required placeholder="Descreva as dimensões e quantidades desejadas..."></textarea>
+                    <label for="name">Nome:</label>
+                    <input type="text" id="name" required>
                 </div>
 
                 <div class="form-group">
-                    <label for="observacoes">Observações Adicionais:</label>
-                    <textarea id="observacoes" name="observacoes"
-                              placeholder="Informações adicionais sobre acabamentos ou outras especificações..."></textarea>
+                    <label for="email">E-mail:</label>
+                    <input type="email" id="email" required>
                 </div>
 
-                <button type="submit" class="submit-button">Enviar Orçamento</button>
+                <div class="form-group">
+                    <label for="phone">Telefone:</label>
+                    <input type="tel" id="phone" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="message">Mensagem (opcional):</label>
+                    <textarea id="message"></textarea>
+                </div>
+
+                <button type="submit" class="submit-button">Enviar Solicitação</button>
             </form>
         </div>
+
+        <div id="loading" class="loading"></div>
+        <div id="status" class="status"></div>
     </div>
 
-    <script src="cities.js"></script>
     <script>
-        function formatarTelefone(input) {
-            let value = input.value.replace(/\D/g, '');
-            if (value.length > 11) value = value.slice(0, 11);
-            
-            if (value.length >= 11) {
-                value = `(${value.slice(0, 2)}) ${value.slice(2, 7)}-${value.slice(7)}`;
-            } else if (value.length >= 7) {
-                value = `(${value.slice(0, 2)}) ${value.slice(2, 7)}-${value.slice(7)}`;
-            } else if (value.length >= 2) {
-                value = `(${value.slice(0, 2)}) ${value.slice(2)}`;
-            }
-            
-            input.value = value;
+        // Configuração do Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyBd1MS-izKfE6Y6QTH_3-giQzZz6FraBkI",
+            authDomain: "comercial-5bc01.firebaseapp.com",
+            projectId: "comercial-5bc01",
+            storageBucket: "comercial-5bc01.firebasestorage.app",
+            messagingSenderId: "956944566020",
+            appId: "1:956944566020:web:dc3e58cba5afcc6e9b7251",
+            measurementId: "G-RF6Y1FZBM9",
+            databaseURL: "https://comercial-5bc01-default-rtdb.firebaseio.com"
+        };
+
+        // Inicializar Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        const woodRef = database.ref('woodData');
+        const quotesRef = database.ref('quotes');
+
+        function showStatus(message, isError = false) {
+            const statusDiv = document.getElementById('status');
+            statusDiv.textContent = message;
+            statusDiv.className = 'status ' + (isError ? 'error' : 'success');
         }
 
-        // Função para carregar os estados
-        function loadStates() {
-            const stateSelect = document.getElementById('estado');
-            if (!stateSelect) {
-                console.error('Elemento select de estado não encontrado');
-                return;
-            }
-
-            const states = getAllStates();
-            stateSelect.innerHTML = '<option value="">Selecione o Estado</option>';
-            states.forEach(state => {
-                const option = document.createElement('option');
-                option.value = state.code;
-                option.textContent = state.name;
-                stateSelect.appendChild(option);
-            });
+        function showLoading(show) {
+            document.getElementById('loading').style.display = show ? 'block' : 'none';
         }
 
-        // Carregar espécies de madeira
-        function loadSpecies() {
-            const woodData = JSON.parse(localStorage.getItem('woodData') || '[]');
-            const speciesGrid = document.getElementById('speciesGrid');
-            speciesGrid.innerHTML = '';
+        function loadWoodTypes() {
+            showLoading(true);
+            woodRef.on('value', (snapshot) => {
+                const woodData = snapshot.val() || [];
+                const woodSelect = document.getElementById('woodType');
+                woodSelect.innerHTML = '<option value="">Selecione o tipo de madeira</option>';
 
-            woodData.forEach(wood => {
-                if (wood.visible) {
-                    const div = document.createElement('div');
-                    div.className = 'species-item';
-                    div.innerHTML = `
-                        <input type="checkbox" 
-                               name="species" 
-                               value="${wood.name}"
-                               id="${wood.name}"
-                               onchange="updateSpeciesSelection(this)">
-                        <label for="${wood.name}">
-                            ${wood.name}
-                            <span class="price">${formatCurrency(wood.price)}</span>
-                        </label>
-                    `;
-                    speciesGrid.appendChild(div);
+                woodData.forEach(wood => {
+                    if (wood.visible) {
+                        const option = document.createElement('option');
+                        option.value = wood.name;
+                        option.textContent = wood.name;
+                        woodSelect.appendChild(option);
+                    }
+                });
+
+                // Verificar se há um tipo de madeira específico na URL
+                const urlParams = new URLSearchParams(window.location.search);
+                const woodType = urlParams.get('wood');
+                if (woodType) {
+                    woodSelect.value = woodType;
                 }
+
+                showLoading(false);
             });
         }
 
-        function updateSpeciesSelection(checkbox) {
-            const selectedSpecies = Array.from(document.querySelectorAll('input[name="species"]:checked'))
-                .map(cb => {
-                    const price = cb.parentElement.querySelector('.price').textContent;
-                    return `${cb.value} - ${price}`;
-                });
-            
-            // Atualizar o campo de espécies selecionadas
-            document.getElementById('selectedSpecies').value = selectedSpecies.join('\n');
-        }
+        document.getElementById('quoteForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            showLoading(true);
 
-        // Atualizar função de envio do formulário
-        function submitForm(event) {
-            event.preventDefault();
-            
-            const selectedSpecies = Array.from(document.querySelectorAll('input[name="species"]:checked'))
-                .map(checkbox => {
-                    const price = checkbox.parentElement.querySelector('.price').textContent;
-                    return `${checkbox.value} - ${price}`;
-                });
-
-            const orcamento = {
-                id: Date.now().toString(),
-                nome: document.getElementById('nome').value,
-                telefone: document.getElementById('telefone').value,
-                estado: document.getElementById('estado').value.toUpperCase(),
-                cidade: document.getElementById('cidade').value,
-                especies: selectedSpecies,
-                pedido: document.getElementById('pedido').value,
-                observacoes: document.getElementById('observacoes').value,
-                data: new Date().toISOString(),
-                status: 'Novo'
+            const quote = {
+                woodType: document.getElementById('woodType').value,
+                quantity: parseFloat(document.getElementById('quantity').value),
+                name: document.getElementById('name').value,
+                email: document.getElementById('email').value,
+                phone: document.getElementById('phone').value,
+                message: document.getElementById('message').value,
+                status: 'pendente',
+                date: new Date().toISOString()
             };
 
-            let orcamentos = JSON.parse(localStorage.getItem('orcamentos') || '[]');
-            orcamentos.push(orcamento);
-            localStorage.setItem('orcamentos', JSON.stringify(orcamentos));
-
-            // Incrementar contador de notificações
-            let notificacoes = parseInt(localStorage.getItem('notificacoes') || '0');
-            localStorage.setItem('notificacoes', (notificacoes + 1).toString());
-
-            alert('Orçamento enviado com sucesso! Entraremos em contato em breve.');
-            window.location.href = 'index.html';
-        }
-
-        function formatCurrency(value) {
-            return new Intl.NumberFormat('pt-BR', {
-                style: 'currency',
-                currency: 'BRL',
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2
-            }).format(value);
-        }
-
-        // Inicializar quando o documento estiver pronto
-        document.addEventListener('DOMContentLoaded', () => {
-            loadSpecies();
-            loadCompanyLogo();
+            quotesRef.push(quote)
+            .then(() => {
+                showStatus('Solicitação enviada com sucesso!');
+                document.getElementById('quoteForm').reset();
+            })
+            .catch(error => {
+                console.error('Erro ao enviar solicitação:', error);
+                showStatus('Erro ao enviar solicitação. Por favor, tente novamente.', true);
+            })
+            .finally(() => {
+                showLoading(false);
+            });
         });
 
-        function loadCompanyLogo() {
-            const settings = JSON.parse(localStorage.getItem('companySettings') || '{}');
-            const logoElement = document.getElementById('companyLogo');
-            
-            if (settings.logo) {
-                logoElement.src = settings.logo;
-                logoElement.style.display = 'block';
-            } else {
-                logoElement.style.display = 'none';
-            }
-        }
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', () => {
+            loadWoodTypes();
+        });
     </script>
 </body>
 </html> 
