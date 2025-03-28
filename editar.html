@@ -705,23 +705,46 @@
         .header-buttons {
             display: flex;
             align-items: center;
-            justify-content: center;
+            justify-content: space-between;
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
             gap: 20px;
+        }
+
+        .back-button, .admin-button {
+            background-color: #4a3228;
+            color: white;
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+
+        .back-button:hover, .admin-button:hover {
+            background-color: #5f422f;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <img src="Logo JN.png" alt="JN Madeiras" style="height: 50px; margin-bottom: 10px;">
             <h1>Gerenciar Produtos</h1>
             <div class="header-buttons">
                 <a href="index.html" class="back-button">Voltar para a Página Inicial</a>
-                <div class="notification-icon">
-                    <a href="orcamentos.html" class="notification-link">
-                        🔔
-                        <span id="notificationBadge" class="notification-badge" style="display: none;">0</span>
-                    </a>
+                <div class="header-right">
+                    <a href="admin.html" class="admin-button">Área Administrativa</a>
+                    <div class="notification-icon">
+                        <a href="orcamentos.html" class="notification-link">
+                            🔔
+                            <span id="notificationBadge" class="notification-badge" style="display: none;">0</span>
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
