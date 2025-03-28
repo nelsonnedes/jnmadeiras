@@ -729,6 +729,137 @@
         .back-button:hover, .admin-button:hover {
             background-color: #5f422f;
         }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+
+            .header {
+                padding: 15px;
+            }
+
+            .header h1 {
+                font-size: 1.5em;
+            }
+
+            .header-buttons {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .header-right {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .admin-button {
+                width: 100%;
+                text-align: center;
+            }
+
+            .products-grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+
+            .product-card {
+                margin: 0;
+            }
+
+            .product-card img {
+                height: 150px;
+            }
+
+            .product-info {
+                padding: 10px;
+            }
+
+            .product-info h3 {
+                font-size: 1.1em;
+            }
+
+            .product-info p {
+                font-size: 0.9em;
+            }
+
+            .modal-content {
+                width: 95%;
+                padding: 15px;
+                margin: 10px;
+            }
+
+            .modal-header {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .modal-header h2 {
+                font-size: 1.2em;
+            }
+
+            .form-group {
+                margin-bottom: 15px;
+            }
+
+            .form-group input,
+            .form-group textarea {
+                font-size: 16px;
+                padding: 12px;
+            }
+
+            .action-button {
+                width: 100%;
+                padding: 12px;
+                font-size: 16px;
+            }
+
+            .product-form {
+                padding: 15px;
+            }
+
+            .product-form input,
+            .product-form textarea {
+                font-size: 16px;
+                padding: 12px;
+            }
+
+            .product-form button {
+                width: 100%;
+                padding: 12px;
+                font-size: 16px;
+            }
+        }
+
+        /* Ajustes para telas muito pequenas */
+        @media (max-width: 480px) {
+            .header h1 {
+                font-size: 1.2em;
+            }
+
+            .product-card img {
+                height: 120px;
+            }
+
+            .product-info h3 {
+                font-size: 1em;
+            }
+
+            .product-info p {
+                font-size: 0.8em;
+            }
+
+            .modal-content {
+                padding: 10px;
+            }
+
+            .form-group input,
+            .form-group textarea,
+            .product-form input,
+            .product-form textarea {
+                padding: 10px;
+            }
+        }
     </style>
 </head>
 <body>
