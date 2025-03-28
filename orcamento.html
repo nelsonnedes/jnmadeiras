@@ -42,16 +42,10 @@
         .header-buttons {
             display: flex;
             align-items: center;
-            justify-content: space-between;
+            justify-content: center;
             width: 100%;
             max-width: 800px;
             margin: 0 auto;
-        }
-
-        .header-right {
-            display: flex;
-            align-items: center;
-            gap: 20px;
         }
 
         .back-button, .admin-button {
@@ -125,48 +119,63 @@
             resize: vertical;
         }
 
-        .produto-item {
+        .produtos-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .produto-card {
+            background: #f8f9fa;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
             display: flex;
+            flex-direction: column;
             gap: 10px;
-            margin-bottom: 10px;
+        }
+
+        .produto-card.selected {
+            border-color: #2c1810;
+            background-color: #f0f0f0;
+        }
+
+        .produto-info {
+            display: flex;
+            justify-content: space-between;
             align-items: center;
         }
 
-        .produto-select {
-            flex: 2;
+        .produto-nome {
+            font-weight: bold;
+            color: #2c1810;
         }
 
-        .quantidade-input {
-            flex: 1;
+        .produto-preco {
+            color: #28a745;
+            font-weight: bold;
         }
 
-        .remove-produto {
-            background-color: #dc3545;
-            color: white;
-            border: none;
-            padding: 10px 15px;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: background-color 0.3s;
+        .produto-quantidade {
+            display: flex;
+            gap: 10px;
+            align-items: center;
         }
 
-        .remove-produto:hover {
-            background-color: #c82333;
+        .produto-quantidade input {
+            width: 100px;
         }
 
-        .add-produto {
-            background-color: #28a745;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-            margin-top: 10px;
+        .checkbox-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
-        .add-produto:hover {
-            background-color: #218838;
+        .checkbox-wrapper input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
         }
 
         .submit-button {
@@ -223,6 +232,25 @@
                 transform: rotate(360deg);
             }
         }
+
+        @media (max-width: 768px) {
+            .produtos-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .produto-card {
+                padding: 10px;
+            }
+
+            .produto-quantidade {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .produto-quantidade input {
+                width: 100%;
+            }
+        }
     </style>
 </head>
 <body>
@@ -231,15 +259,6 @@
             <h1>Solicitar Orçamento</h1>
             <div class="header-buttons">
                 <a href="index.html" class="back-button">Voltar para a Página Inicial</a>
-                <div class="header-right">
-                    <a href="admin.html" class="admin-button">Área Administrativa</a>
-                    <div class="notification-icon">
-                        <a href="orcamentos.html" class="notification-link">
-                            🔔
-                            <span id="notificationBadge" class="notification-badge" style="display: none;">0</span>
-                        </a>
-                    </div>
-                </div>
             </div>
         </div>
 
@@ -268,26 +287,26 @@
 
                 <div class="form-group">
                     <label>Produtos:</label>
-                    <div id="produtosContainer">
-                        <div class="produto-item">
-                            <select class="produto-select" required>
-                                <option value="">Selecione um produto</option>
-                            </select>
-                            <input type="number" class="quantidade-input" placeholder="Quantidade (m³)" min="0" step="0.001" required>
-                            <button type="button" class="remove-produto" onclick="removerProduto(this)">Remover</button>
-                        </div>
+                    <div id="produtosGrid" class="produtos-grid">
+                        <!-- Produtos serão inseridos aqui via JavaScript -->
                     </div>
-                    <button type="button" class="add-produto" onclick="adicionarProduto()">Adicionar Produto</button>
                 </div>
 
                 <div class="form-group">
                     <label for="pedido">Detalhes do Pedido:</label>
-                    <textarea id="pedido" required></textarea>
+                    <textarea id="pedido" required placeholder="Exemplo de preenchimento:
+5m³ 5x20 Viga
+5m³ 5x12 Viga
+3m³ 5x10 Vigota
+2m³ 5x5 Caibro
+3m³ 5x3 Caibrinhos
+3m³ 1,2x5 Ripas"></textarea>
                 </div>
 
                 <div class="form-group">
                     <label for="observacoes">Observações:</label>
-                    <textarea id="observacoes"></textarea>
+                    <textarea id="observacoes" placeholder="Exemplo de preenchimento:
+Forçar nos Tamanhos 4,0m / 4,5m / 5,0m / 6,0m"></textarea>
                 </div>
 
                 <button type="submit" class="submit-button">Enviar Solicitação</button>
@@ -321,6 +340,7 @@
             const statusDiv = document.getElementById('status');
             statusDiv.textContent = message;
             statusDiv.className = 'status ' + (isError ? 'error' : 'success');
+            statusDiv.style.display = 'block';
         }
 
         function showLoading(show) {
@@ -338,30 +358,29 @@
             showLoading(true);
             woodRef.once('value').then((snapshot) => {
                 const woodData = snapshot.val() || [];
-                const selects = document.querySelectorAll('.produto-select');
+                const produtosGrid = document.getElementById('produtosGrid');
+                produtosGrid.innerHTML = '';
                 
-                selects.forEach(select => {
-                    select.innerHTML = '<option value="">Selecione um produto</option>';
-                    woodData.forEach(wood => {
-                        if (wood.visible) {
-                            const option = document.createElement('option');
-                            option.value = wood.name;
-                            option.textContent = `${wood.name} - ${formatCurrency(wood.price)}`;
-                            select.appendChild(option);
-                        }
-                    });
+                woodData.forEach(wood => {
+                    if (wood.visible) {
+                        const produtoCard = document.createElement('div');
+                        produtoCard.className = 'produto-card';
+                        produtoCard.innerHTML = `
+                            <div class="checkbox-wrapper">
+                                <input type="checkbox" id="produto-${wood.name}" onchange="toggleProduto(this, '${wood.name}', ${wood.price})">
+                                <label for="produto-${wood.name}">${wood.name}</label>
+                            </div>
+                            <div class="produto-info">
+                                <span class="produto-preco">${formatCurrency(wood.price)}</span>
+                            </div>
+                            <div class="produto-quantidade" style="display: none;">
+                                <label>Quantidade (m³):</label>
+                                <input type="number" min="0" step="0.001" required>
+                            </div>
+                        `;
+                        produtosGrid.appendChild(produtoCard);
+                    }
                 });
-
-                // Verificar se há um tipo de madeira específico na URL
-                const urlParams = new URLSearchParams(window.location.search);
-                const woodType = urlParams.get('wood');
-                if (woodType) {
-                    selects.forEach(select => {
-                        if (select.value === woodType) {
-                            select.selected = true;
-                        }
-                    });
-                }
 
                 showLoading(false);
             }).catch(error => {
@@ -371,50 +390,42 @@
             });
         }
 
-        function adicionarProduto() {
-            const container = document.getElementById('produtosContainer');
-            const novoProduto = document.createElement('div');
-            novoProduto.className = 'produto-item';
-            novoProduto.innerHTML = `
-                <select class="produto-select" required>
-                    <option value="">Selecione um produto</option>
-                </select>
-                <input type="number" class="quantidade-input" placeholder="Quantidade (m³)" min="0" step="0.001" required>
-                <button type="button" class="remove-produto" onclick="removerProduto(this)">Remover</button>
-            `;
-            container.appendChild(novoProduto);
-            loadWoodTypes(); // Recarrega as opções no novo select
-        }
-
-        function removerProduto(button) {
-            const container = document.getElementById('produtosContainer');
-            if (container.children.length > 1) {
-                button.parentElement.remove();
+        function toggleProduto(checkbox, nome, preco) {
+            const card = checkbox.closest('.produto-card');
+            const quantidadeDiv = card.querySelector('.produto-quantidade');
+            
+            if (checkbox.checked) {
+                card.classList.add('selected');
+                quantidadeDiv.style.display = 'flex';
             } else {
-                showStatus('É necessário ter pelo menos um produto!', true);
+                card.classList.remove('selected');
+                quantidadeDiv.style.display = 'none';
             }
         }
 
         function enviarOrcamento(event) {
             event.preventDefault();
+            showLoading(true);
             
             const produtos = [];
-            const selects = document.querySelectorAll('.produto-select');
-            const quantidades = document.querySelectorAll('.quantidade-input');
+            const cards = document.querySelectorAll('.produto-card');
             
-            for (let i = 0; i < selects.length; i++) {
-                const produto = selects[i].value;
-                const quantidade = parseFloat(quantidades[i].value);
-                if (produto && quantidade > 0) {
-                    produtos.push({
-                        nome: produto,
-                        quantidade: quantidade
-                    });
+            cards.forEach(card => {
+                const checkbox = card.querySelector('input[type="checkbox"]');
+                if (checkbox.checked) {
+                    const quantidade = parseFloat(card.querySelector('input[type="number"]').value);
+                    if (quantidade > 0) {
+                        produtos.push({
+                            nome: checkbox.id.replace('produto-', ''),
+                            quantidade: quantidade
+                        });
+                    }
                 }
-            }
+            });
 
             if (produtos.length === 0) {
                 showStatus('Selecione pelo menos um produto!', true);
+                showLoading(false);
                 return;
             }
 
@@ -430,24 +441,35 @@
                 status: 'pendente'
             };
 
+            console.log('Enviando orçamento:', orcamento);
+
             quotesRef.push(orcamento)
-                .then(() => {
+                .then((ref) => {
+                    console.log('Orçamento enviado com sucesso! ID:', ref.key);
                     showStatus('Orçamento enviado com sucesso!');
                     event.target.reset();
-                    // Voltar para um produto
-                    const container = document.getElementById('produtosContainer');
-                    while (container.children.length > 1) {
-                        container.removeChild(container.lastChild);
-                    }
+                    // Desmarcar todos os checkboxes
+                    document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+                        checkbox.checked = false;
+                        toggleProduto(checkbox, checkbox.id.replace('produto-', ''), 0);
+                    });
+                    // Redirecionar para a página inicial após 2 segundos
+                    setTimeout(() => {
+                        window.location.href = 'index.html';
+                    }, 2000);
                 })
                 .catch(error => {
                     console.error('Erro ao enviar orçamento:', error);
                     showStatus('Erro ao enviar orçamento. Tente novamente.', true);
+                })
+                .finally(() => {
+                    showLoading(false);
                 });
         }
 
         // Inicialização
         document.addEventListener('DOMContentLoaded', () => {
+            console.log('Inicializando página...');
             loadWoodTypes();
         });
     </script>
