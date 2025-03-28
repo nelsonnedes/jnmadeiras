@@ -284,98 +284,58 @@
         }
 
         async function initializeDatabase() {
-            try {
-                showStatus('Iniciando inicialização do banco de dados...');
-                log('Iniciando processo de inicialização...');
-                log('Configuração do Firebase: ' + JSON.stringify(firebaseConfig, null, 2));
+            const database = firebase.database();
+            const woodRef = database.ref('woodData');
+            const quotesRef = database.ref('quotes');
+            const settingsRef = database.ref('settings');
 
-                // Testar conexão com o Firebase
-                log('Testando conexão com o Firebase...');
-                try {
-                    const testRef = database.ref('test');
-                    await testRef.set({ timestamp: Date.now() });
-                    const snapshot = await testRef.once('value');
-                    log('Teste de conexão bem sucedido: ' + JSON.stringify(snapshot.val()));
-                    log('Conexão com o Firebase estabelecida com sucesso!');
-                } catch (error) {
-                    log(`Erro detalhado ao testar conexão: ${error.message}`);
-                    log(`Código do erro: ${error.code}`);
-                    throw new Error(`Não foi possível conectar ao Firebase: ${error.message}`);
+            // Inicializar dados de madeiras
+            const woodData = [
+                { name: "Viga 5x20", quantity: 100, percentage: 100, price: 2500, visible: true },
+                { name: "Viga 5x12", quantity: 100, percentage: 100, price: 1500, visible: true },
+                { name: "Vigota 5x10", quantity: 100, percentage: 100, price: 1200, visible: true },
+                { name: "Caibro 5x5", quantity: 100, percentage: 100, price: 800, visible: true },
+                { name: "Caibrinho 5x3", quantity: 100, percentage: 100, price: 600, visible: true },
+                { name: "Ripa 1,2x5", quantity: 100, percentage: 100, price: 400, visible: true }
+            ];
+
+            // Inicializar configurações
+            const settings = {
+                companyName: "JN Madeiras",
+                phone: "(11) 99999-9999",
+                email: "contato@jnmadeiras.com",
+                address: "Rua Exemplo, 123",
+                city: "São Paulo",
+                state: "SP",
+                logoUrl: "Logo JN.png",
+                promoText: "Ofertas especiais em madeiras de qualidade!"
+            };
+
+            // Criar estrutura de orçamentos
+            const quotesStructure = {
+                quotes: {
+                    ".read": true,
+                    ".write": true
                 }
+            };
 
-                // Inicializar dados de madeira
-                log('Inicializando dados de madeira...');
-                try {
-                    await database.ref('woodData').set(defaultWoodData);
-                    log('Dados de madeira salvos com sucesso');
-                    showStatus('Dados de madeira inicializados com sucesso!');
-                } catch (error) {
-                    log(`Erro ao salvar dados de madeira: ${error.message}`);
-                    throw error;
-                }
-
-                // Inicializar texto promocional
-                log('Inicializando texto promocional...');
-                try {
-                    await database.ref('promoText').set(defaultPromoText);
-                    log('Texto promocional salvo com sucesso');
-                    showStatus('Texto promocional inicializado com sucesso!');
-                } catch (error) {
-                    log(`Erro ao salvar texto promocional: ${error.message}`);
-                    throw error;
-                }
-
-                // Inicializar configurações da empresa
-                log('Inicializando configurações da empresa...');
-                try {
-                    await database.ref('companySettings').set(defaultCompanySettings);
-                    log('Configurações da empresa salvas com sucesso');
-                    showStatus('Configurações da empresa inicializadas com sucesso!');
-                } catch (error) {
-                    log(`Erro ao salvar configurações da empresa: ${error.message}`);
-                    throw error;
-                }
-
-                // Inicializar estrutura de orçamentos
-                log('Inicializando estrutura de orçamentos...');
-                try {
-                    await database.ref('quotes').set(defaultQuotes);
-                    log('Estrutura de orçamentos salva com sucesso');
-                    showStatus('Estrutura de orçamentos inicializada com sucesso!');
-                } catch (error) {
-                    log(`Erro ao salvar estrutura de orçamentos: ${error.message}`);
-                    throw error;
-                }
-
-                // Inicializar estrutura de notificações
-                log('Inicializando estrutura de notificações...');
-                try {
-                    await database.ref('notifications').set(defaultNotifications);
-                    log('Estrutura de notificações salva com sucesso');
-                    showStatus('Estrutura de notificações inicializada com sucesso!');
-                } catch (error) {
-                    log(`Erro ao salvar estrutura de notificações: ${error.message}`);
-                    throw error;
-                }
-
-                // Inicializar estrutura de usuários
-                log('Inicializando estrutura de usuários...');
-                try {
-                    await database.ref('users').set(defaultUsers);
-                    log('Estrutura de usuários salva com sucesso');
-                    showStatus('Estrutura de usuários inicializada com sucesso!');
-                } catch (error) {
-                    log(`Erro ao salvar estrutura de usuários: ${error.message}`);
-                    throw error;
-                }
-
-                showStatus('Banco de dados inicializado com sucesso!');
-                log('Processo de inicialização concluído com sucesso!');
-            } catch (error) {
-                log(`Erro detalhado ao inicializar banco de dados: ${error.message}`);
-                log(`Stack trace: ${error.stack}`);
-                showStatus('Erro ao inicializar banco de dados: ' + error.message, true);
-            }
+            // Atualizar regras do banco de dados
+            database.ref('.rules').set(quotesStructure)
+                .then(() => {
+                    // Inicializar dados
+                    return Promise.all([
+                        woodRef.set(woodData),
+                        settingsRef.set(settings),
+                        quotesRef.set({}) // Criar estrutura vazia para orçamentos
+                    ]);
+                })
+                .then(() => {
+                    showStatus('Banco de dados inicializado com sucesso!');
+                })
+                .catch(error => {
+                    console.error('Erro ao inicializar banco de dados:', error);
+                    showStatus('Erro ao inicializar banco de dados.', true);
+                });
         }
 
         // Adicionar listener para erros de conexão

@@ -39,18 +39,31 @@
             margin-bottom: 10px;
         }
 
-        .back-button {
-            display: inline-block;
+        .header-buttons {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .back-button, .admin-button {
             background-color: #4a3228;
             color: white;
             text-decoration: none;
             padding: 10px 20px;
             border-radius: 4px;
-            margin-top: 10px;
             transition: background-color 0.3s;
         }
 
-        .back-button:hover {
+        .back-button:hover, .admin-button:hover {
             background-color: #5f422f;
         }
 
@@ -127,7 +140,11 @@
     <div class="container">
         <div class="header">
             <h1>Configurações</h1>
-            <a href="admin.html" class="back-button">Voltar para o Painel</a>
+            <div class="header-buttons">
+                <div class="header-right">
+                    <a href="admin.html" class="back-button">Voltar para o Painel</a>
+                </div>
+            </div>
         </div>
 
         <div class="settings-container">

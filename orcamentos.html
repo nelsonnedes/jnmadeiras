@@ -7,6 +7,9 @@
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-database-compat.js"></script>
+    <!-- Adicionar biblioteca jsPDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -61,6 +64,8 @@
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             border-collapse: collapse;
             margin-top: 20px;
+            display: block;
+            overflow-x: auto;
         }
 
         .quotes-table th,
@@ -68,34 +73,50 @@
             padding: 12px;
             text-align: left;
             border-bottom: 1px solid #ddd;
+            white-space: nowrap;
         }
 
         .quotes-table th {
             background-color: #2c1810;
             color: white;
+            position: sticky;
+            top: 0;
+            z-index: 1;
         }
 
         .quotes-table tr:hover {
             background-color: #f5f5f5;
         }
 
+        .quotes-table td {
+            vertical-align: top;
+        }
+
+        .quotes-table td:not(:last-child) {
+            min-width: 120px;
+        }
+
         .status-badge {
             padding: 4px 8px;
             border-radius: 4px;
             font-size: 0.9em;
+            display: inline-block;
+            min-width: 80px;
+            text-align: center;
+            text-transform: capitalize;
         }
 
-        .status-pending {
+        .status-pendente {
             background-color: #fff3cd;
             color: #856404;
         }
 
-        .status-approved {
+        .status-aprovado {
             background-color: #d4edda;
             color: #155724;
         }
 
-        .status-rejected {
+        .status-rejeitado {
             background-color: #f8d7da;
             color: #721c24;
         }
@@ -104,15 +125,24 @@
             background-color: #2c1810;
             color: white;
             border: none;
-            padding: 6px 12px;
+            padding: 8px 12px;
             border-radius: 4px;
             cursor: pointer;
             margin-right: 5px;
             transition: background-color 0.3s;
+            font-size: 0.9em;
         }
 
         .action-button:hover {
             background-color: #4a3228;
+        }
+
+        .action-button.delete {
+            background-color: #dc3545;
+        }
+
+        .action-button.delete:hover {
+            background-color: #c82333;
         }
 
         .status {
@@ -152,6 +182,8 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
+            max-height: 90vh;
+            overflow-y: auto;
         }
 
         .modal-header {
@@ -176,6 +208,27 @@
 
         .quote-details {
             margin-bottom: 20px;
+            max-height: 60vh;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+
+        .quote-details::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .quote-details::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+
+        .quote-details::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 4px;
+        }
+
+        .quote-details::-webkit-scrollbar-thumb:hover {
+            background: #555;
         }
 
         .quote-details p {
@@ -186,28 +239,170 @@
             display: flex;
             justify-content: flex-end;
             gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .header-buttons {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .admin-button {
+            background-color: #4a3228;
+            color: white;
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+
+        .admin-button:hover {
+            background-color: #5f422f;
+        }
+
+        .notification-icon {
+            position: relative;
+        }
+
+        .notification-link {
+            font-size: 24px;
+            text-decoration: none;
+            color: white;
+            display: flex;
+            align-items: center;
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background-color: #ff4444;
+            color: white;
+            border-radius: 50%;
+            padding: 2px 6px;
+            font-size: 12px;
+            min-width: 18px;
+            text-align: center;
+        }
+
+        .contra-proposta-section {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+            display: none;
+        }
+
+        .contra-proposta-section.show {
+            display: block;
+        }
+
+        .contra-proposta-form {
+            margin-top: 15px;
+        }
+
+        .contra-proposta-form textarea {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            min-height: 100px;
+        }
+
+        .contra-proposta-form button {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .contra-proposta-form button:hover {
+            background-color: #218838;
+        }
+
+        @media (max-width: 768px) {
+            .header-buttons {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .header-right {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .quotes-table {
+                margin: 10px -20px;
+                border-radius: 0;
+            }
+
+            .action-button {
+                padding: 6px 10px;
+                font-size: 0.8em;
+            }
+
+            .modal-content {
+                width: 95%;
+                margin: 10px;
+                padding: 15px;
+            }
+
+            .modal-buttons {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .modal-buttons .action-button {
+                width: 100%;
+                margin: 0;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>Gerenciar Orçamentos</h1>
-            <a href="admin.html" class="back-button">Voltar para o Painel</a>
+            <h1>Orçamentos</h1>
+            <div class="header-buttons">
+                <a href="index.html" class="back-button">Voltar para a Página Inicial</a>
+                <div class="header-right">
+                    <a href="admin.html" class="admin-button">Área Administrativa</a>
+                    <div class="notification-icon">
+                        <a href="orcamentos.html" class="notification-link">
+                            🔔
+                            <span id="notificationBadge" class="notification-badge" style="display: none;">0</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <table class="quotes-table">
             <thead>
                 <tr>
                     <th>Data</th>
-                    <th>Cliente</th>
-                    <th>Produto</th>
-                    <th>Quantidade</th>
+                    <th>Nome</th>
+                    <th>Telefone</th>
+                    <th>Produtos</th>
+                    <th>Localização</th>
                     <th>Status</th>
                     <th>Ações</th>
                 </tr>
             </thead>
-            <tbody id="quotesTableBody">
+            <tbody>
                 <!-- Dados serão inseridos aqui via JavaScript -->
             </tbody>
         </table>
@@ -228,6 +423,16 @@
             <div class="modal-buttons">
                 <button class="action-button" onclick="updateQuoteStatus('aprovado')">Aprovar</button>
                 <button class="action-button" onclick="updateQuoteStatus('rejeitado')">Rejeitar</button>
+                <button class="action-button" onclick="toggleContraProposta()">Contra Proposta</button>
+                <button class="action-button delete" onclick="deleteQuote()">Excluir</button>
+            </div>
+
+            <div id="contraPropostaSection" class="contra-proposta-section">
+                <h3>Contra Proposta</h3>
+                <div class="contra-proposta-form">
+                    <textarea id="contraPropostaText" placeholder="Digite sua contra proposta aqui..."></textarea>
+                    <button onclick="enviarContraProposta()">Enviar Contra Proposta</button>
+                </div>
             </div>
         </div>
     </div>
@@ -251,6 +456,7 @@
         const quotesRef = database.ref('quotes');
 
         let currentQuoteId = null;
+        let currentQuote = null;
 
         function showStatus(message, isError = false) {
             const statusDiv = document.getElementById('status');
@@ -259,7 +465,9 @@
         }
 
         function formatDate(dateString) {
+            if (!dateString) return 'Data não disponível';
             const date = new Date(dateString);
+            if (isNaN(date.getTime())) return 'Data inválida';
             return date.toLocaleDateString('pt-BR', {
                 day: '2-digit',
                 month: '2-digit',
@@ -276,46 +484,69 @@
             }).format(value) + ' m³';
         }
 
-        function loadQuotes() {
-            quotesRef.on('value', (snapshot) => {
-                const quotes = snapshot.val() || {};
-                const tbody = document.getElementById('quotesTableBody');
-                tbody.innerHTML = '';
+        function renderQuotes(quotes) {
+            const tbody = document.querySelector('.quotes-table tbody');
+            tbody.innerHTML = '';
 
-                Object.entries(quotes).forEach(([id, quote]) => {
-                    const tr = document.createElement('tr');
-                    tr.innerHTML = `
-                        <td>${formatDate(quote.date)}</td>
-                        <td>${quote.name}</td>
-                        <td>${quote.woodType}</td>
-                        <td>${formatVolume(quote.quantity)}</td>
-                        <td><span class="status-badge status-${quote.status}">${quote.status}</span></td>
-                        <td>
-                            <button class="action-button" onclick="showQuoteDetails('${id}')">Ver Detalhes</button>
-                        </td>
-                    `;
-                    tbody.appendChild(tr);
-                });
+            if (!quotes || Object.keys(quotes).length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align: center;">Nenhum orçamento encontrado</td></tr>';
+                return;
+            }
+
+            Object.entries(quotes).forEach(([id, quote]) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${formatDate(quote.data)}</td>
+                    <td>${quote.nome || 'N/A'}</td>
+                    <td>${quote.telefone || 'N/A'}</td>
+                    <td>${quote.produtos ? quote.produtos.map(p => `${p.nome} - ${p.quantidade} m³`).join('<br>') : 'N/A'}</td>
+                    <td>${quote.cidade ? `${quote.cidade} - ${quote.estado}` : 'N/A'}</td>
+                    <td><span class="status-badge ${quote.status || 'pendente'}">${quote.status || 'pendente'}</span></td>
+                    <td>
+                        <button class="action-button" onclick="showQuoteDetails('${id}')">Ver Detalhes</button>
+                    </td>
+                `;
+                tbody.appendChild(row);
             });
         }
 
         function showQuoteDetails(quoteId) {
             currentQuoteId = quoteId;
-            const modal = document.getElementById('quoteModal');
-            const details = document.getElementById('quoteDetails');
-
-            quotesRef.child(quoteId).once('value', (snapshot) => {
-                const quote = snapshot.val();
-                details.innerHTML = `
-                    <p><strong>Data:</strong> ${formatDate(quote.date)}</p>
-                    <p><strong>Cliente:</strong> ${quote.name}</p>
-                    <p><strong>E-mail:</strong> ${quote.email}</p>
-                    <p><strong>Telefone:</strong> ${quote.phone}</p>
-                    <p><strong>Produto:</strong> ${quote.woodType}</p>
-                    <p><strong>Quantidade:</strong> ${formatVolume(quote.quantity)}</p>
-                    <p><strong>Mensagem:</strong> ${quote.message || 'Nenhuma mensagem adicional.'}</p>
-                `;
-                modal.style.display = 'block';
+            quotesRef.child(quoteId).once('value').then(snapshot => {
+                currentQuote = snapshot.val();
+                if (currentQuote) {
+                    const contraPropostas = currentQuote.contraPropostas || {};
+                    document.getElementById('quoteDetails').innerHTML = `
+                        <h3>Detalhes do Orçamento</h3>
+                        <p><strong>Data:</strong> ${formatDate(currentQuote.data)}</p>
+                        <p><strong>Nome:</strong> ${currentQuote.nome}</p>
+                        <p><strong>Telefone:</strong> ${currentQuote.telefone}</p>
+                        <p><strong>Cidade:</strong> ${currentQuote.cidade}</p>
+                        <p><strong>Estado:</strong> ${currentQuote.estado}</p>
+                        <p><strong>Produtos:</strong></p>
+                        <ul>
+                            ${currentQuote.produtos.map(p => `<li>${p.nome} - ${p.quantidade} m³</li>`).join('')}
+                        </ul>
+                        <p><strong>Detalhes do Pedido:</strong></p>
+                        <pre>${currentQuote.pedido}</pre>
+                        <p><strong>Observações:</strong></p>
+                        <pre>${currentQuote.observacoes || 'Nenhuma observação'}</pre>
+                        <p><strong>Status:</strong> <span class="status-badge ${currentQuote.status}">${currentQuote.status}</span></p>
+                        ${Object.keys(contraPropostas).length > 0 ? `
+                            <h4>Histórico de Contra Propostas</h4>
+                            <ul>
+                                ${Object.entries(contraPropostas).map(([id, cp]) => `
+                                    <li>
+                                        <strong>Data:</strong> ${formatDate(cp.data)}<br>
+                                        <strong>Proposta:</strong> ${cp.texto}<br>
+                                        <strong>Status:</strong> ${cp.status}
+                                    </li>
+                                `).join('')}
+                            </ul>
+                        ` : ''}
+                    `;
+                    document.getElementById('quoteModal').style.display = 'block';
+                }
             });
         }
 
@@ -342,11 +573,184 @@
             });
         }
 
+        function deleteQuote() {
+            if (!currentQuoteId) return;
+
+            if (confirm('Tem certeza que deseja excluir este orçamento? Esta ação não pode ser desfeita.')) {
+                quotesRef.child(currentQuoteId).remove()
+                    .then(() => {
+                        showStatus('Orçamento excluído com sucesso!');
+                        closeModal();
+                    })
+                    .catch(error => {
+                        console.error('Erro ao excluir orçamento:', error);
+                        showStatus('Erro ao excluir orçamento.', true);
+                    });
+            }
+        }
+
         // Fechar modal ao clicar fora
         window.onclick = function(event) {
             const modal = document.getElementById('quoteModal');
             if (event.target === modal) {
                 closeModal();
+            }
+        }
+
+        function loadQuotes() {
+            quotesRef.on('value', (snapshot) => {
+                const quotes = snapshot.val() || {};
+                console.log('Dados recebidos:', quotes); // Log para debug
+                renderQuotes(quotes);
+            }, (error) => {
+                console.error('Erro ao carregar orçamentos:', error);
+                showStatus('Erro ao carregar orçamentos. Tente novamente.', true);
+            });
+        }
+
+        function toggleContraProposta() {
+            const section = document.getElementById('contraPropostaSection');
+            section.classList.toggle('show');
+        }
+
+        function enviarContraProposta() {
+            console.log('Iniciando envio de contra proposta...');
+            console.log('currentQuoteId:', currentQuoteId);
+            
+            if (!currentQuoteId) {
+                console.error('ID do orçamento não encontrado');
+                showStatus('ID do orçamento não encontrado.', true);
+                return;
+            }
+
+            const contraProposta = document.getElementById('contraPropostaText').value;
+            console.log('Texto da contra proposta:', contraProposta);
+            
+            if (!contraProposta.trim()) {
+                console.error('Contra proposta vazia');
+                showStatus('Digite uma contra proposta válida.', true);
+                return;
+            }
+
+            const contraPropostaData = {
+                texto: contraProposta,
+                data: new Date().toISOString(),
+                status: 'pendente'
+            };
+            
+            console.log('Dados da contra proposta:', contraPropostaData);
+
+            // Verificar se o orçamento existe antes de tentar salvar
+            quotesRef.child(currentQuoteId).once('value')
+                .then(snapshot => {
+                    console.log('Snapshot do orçamento:', snapshot.val());
+                    if (!snapshot.exists()) {
+                        throw new Error('Orçamento não encontrado');
+                    }
+                    
+                    // Criar uma nova referência para a contra proposta
+                    const contraPropostaRef = quotesRef.child(currentQuoteId).child('contraPropostas').push();
+                    console.log('Referência da contra proposta criada:', contraPropostaRef.key);
+                    
+                    return contraPropostaRef.set(contraPropostaData);
+                })
+                .then(() => {
+                    console.log('Contra proposta salva com sucesso');
+                    showStatus('Contra proposta enviada com sucesso!');
+                    document.getElementById('contraPropostaText').value = '';
+                    toggleContraProposta();
+                    
+                    // Recarregar os detalhes do orçamento
+                    showQuoteDetails(currentQuoteId);
+                    
+                    // Buscar os dados atualizados do orçamento antes de gerar o PDF
+                    return quotesRef.child(currentQuoteId).once('value');
+                })
+                .then(snapshot => {
+                    const quoteData = snapshot.val();
+                    if (quoteData) {
+                        console.log('Gerando PDF da contra proposta');
+                        gerarPDFContraProposta(quoteData, contraPropostaData);
+                    } else {
+                        throw new Error('Dados do orçamento não encontrados');
+                    }
+                })
+                .catch(error => {
+                    console.error('Erro detalhado ao enviar contra proposta:', error);
+                    showStatus(`Erro ao enviar contra proposta: ${error.message}`, true);
+                });
+        }
+
+        function gerarPDFContraProposta(quote, contraProposta) {
+            if (!quote || !contraProposta) {
+                console.error('Dados incompletos para gerar PDF');
+                return;
+            }
+
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            // Configurar fonte e tamanho
+            doc.setFontSize(16);
+            doc.setFont('helvetica', 'bold');
+
+            // Adicionar logo (ajuste o caminho conforme necessário)
+            const logo = new Image();
+            logo.src = 'Logo JN.png';
+            doc.addImage(logo, 'PNG', 10, 10, 30, 30);
+
+            // Dados da empresa
+            doc.setFontSize(12);
+            doc.setFont('helvetica', 'normal');
+            doc.text('JN Madeiras', 50, 20);
+            doc.text('Rua Exemplo, 123', 50, 25);
+            doc.text('São Paulo - SP', 50, 30);
+            doc.text('Tel: (11) 99999-9999', 50, 35);
+            doc.text('Email: contato@jnmadeiras.com', 50, 40);
+
+            // Dados do cliente
+            doc.setFontSize(14);
+            doc.setFont('helvetica', 'bold');
+            doc.text('Dados do Cliente', 10, 60);
+            doc.setFontSize(12);
+            doc.setFont('helvetica', 'normal');
+            doc.text(`Nome: ${quote.nome || 'N/A'}`, 10, 70);
+            doc.text(`Telefone: ${quote.telefone || 'N/A'}`, 10, 75);
+            doc.text(`Cidade: ${quote.cidade || 'N/A'}`, 10, 80);
+            doc.text(`Estado: ${quote.estado || 'N/A'}`, 10, 85);
+
+            // Dados do orçamento
+            doc.setFontSize(14);
+            doc.setFont('helvetica', 'bold');
+            doc.text('Detalhes do Orçamento', 10, 100);
+            doc.setFontSize(12);
+            doc.setFont('helvetica', 'normal');
+            doc.text(`Data: ${formatDate(quote.data)}`, 10, 110);
+            doc.text('Produtos:', 10, 120);
+            let y = 125;
+            if (quote.produtos && Array.isArray(quote.produtos)) {
+                quote.produtos.forEach(produto => {
+                    doc.text(`- ${produto.nome}: ${produto.quantidade} m³`, 15, y);
+                    y += 5;
+                });
+            }
+
+            // Contra proposta
+            doc.setFontSize(14);
+            doc.setFont('helvetica', 'bold');
+            doc.text('Contra Proposta', 10, y + 10);
+            doc.setFontSize(12);
+            doc.setFont('helvetica', 'normal');
+            const splitText = doc.splitTextToSize(contraProposta.texto, 180);
+            doc.text(splitText, 10, y + 20);
+
+            // Salvar PDF
+            doc.save(`contra_proposta_${currentQuoteId}.pdf`);
+
+            // Compartilhar via WhatsApp
+            if (quote.telefone) {
+                const whatsappLink = `https://wa.me/${quote.telefone.replace(/\D/g, '')}?text=Olá ${quote.nome || 'cliente'}, segue nossa contra proposta para seu orçamento.`;
+                window.open(whatsappLink, '_blank');
             }
         }
 

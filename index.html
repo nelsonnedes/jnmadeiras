@@ -32,6 +32,7 @@
             background-color: #2c1810;
             color: white;
             border-radius: 8px;
+            position: relative;
         }
 
         .header h1 {
@@ -84,7 +85,7 @@
 
         .wood-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
             gap: 20px;
             margin-top: 20px;
         }
@@ -95,6 +96,8 @@
             padding: 20px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             transition: transform 0.3s;
+            display: flex;
+            flex-direction: column;
         }
 
         .wood-card:hover {
@@ -126,7 +129,7 @@
             border-radius: 4px;
             cursor: pointer;
             width: 100%;
-            margin-top: 10px;
+            margin-top: auto;
             transition: background-color 0.3s;
         }
 
@@ -186,7 +189,7 @@
 
         .modal-content {
             background-color: white;
-            padding: 20px;
+            padding: 30px;
             border-radius: 8px;
             width: 90%;
             max-width: 400px;
@@ -194,26 +197,23 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
         }
 
         .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
+            text-align: center;
+            margin-bottom: 30px;
         }
 
         .modal-header h2 {
             color: #2c1810;
-            margin: 0;
+            font-size: 24px;
+            margin-bottom: 10px;
         }
 
-        .close-button {
-            background: none;
-            border: none;
-            font-size: 24px;
-            cursor: pointer;
+        .modal-header p {
             color: #666;
+            font-size: 14px;
         }
 
         .form-group {
@@ -222,17 +222,117 @@
 
         .form-group label {
             display: block;
-            margin-bottom: 5px;
+            margin-bottom: 8px;
             color: #2c1810;
             font-weight: bold;
         }
 
         .form-group input {
             width: 100%;
-            padding: 10px;
-            border: 1px solid #ddd;
+            padding: 12px;
+            border: 2px solid #ddd;
             border-radius: 4px;
             font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus {
+            border-color: #2c1810;
+            outline: none;
+        }
+
+        .submit-button {
+            background-color: #2c1810;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+
+        .submit-button:hover {
+            background-color: #4a3228;
+        }
+
+        .close-button {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #666;
+            padding: 5px;
+        }
+
+        .close-button:hover {
+            color: #2c1810;
+        }
+
+        .error-message {
+            color: #dc3545;
+            font-size: 14px;
+            margin-top: 5px;
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                padding: 15px;
+            }
+
+            .header h1 {
+                font-size: 2em;
+            }
+
+            .menu {
+                position: static;
+                margin-top: 10px;
+            }
+
+            .menu-button {
+                width: 100%;
+                margin: 5px 0;
+            }
+
+            .promo-section {
+                padding: 15px;
+            }
+
+            .promo-section h2 {
+                font-size: 1.3em;
+            }
+
+            .promo-section p {
+                font-size: 1em;
+            }
+
+            .wood-grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+
+            .wood-card {
+                padding: 15px;
+            }
+
+            .modal-content {
+                width: 95%;
+                margin: 10px;
+                padding: 15px;
+            }
+
+            .form-group input {
+                padding: 10px;
+            }
+
+            .submit-button {
+                padding: 12px 20px;
+            }
         }
     </style>
 </head>
@@ -258,6 +358,25 @@
                     <input type="password" id="adminPassword" required>
                 </div>
                 <button onclick="verifyPassword()" class="submit-button">Entrar</button>
+            </div>
+        </div>
+
+        <!-- Modal de Login Administrativo -->
+        <div id="adminLoginModal" class="modal">
+            <div class="modal-content">
+                <button class="close-button" onclick="closeAdminLoginModal()">&times;</button>
+                <div class="modal-header">
+                    <h2>Login Administrativo</h2>
+                    <p>Digite sua senha para acessar a área administrativa</p>
+                </div>
+                <form id="adminLoginForm" onsubmit="verifyAdminPassword(event)">
+                    <div class="form-group">
+                        <label for="adminPassword">Senha:</label>
+                        <input type="password" id="adminPassword" required>
+                        <div class="error-message" id="passwordError">Senha incorreta. Tente novamente.</div>
+                    </div>
+                    <button type="submit" class="submit-button">Entrar</button>
+                </form>
             </div>
         </div>
 
@@ -381,11 +500,38 @@
             }
         }
 
+        function showAdminLoginModal() {
+            document.getElementById('adminLoginModal').style.display = 'block';
+        }
+
+        function closeAdminLoginModal() {
+            document.getElementById('adminLoginModal').style.display = 'none';
+            document.getElementById('adminPassword').value = '';
+            document.getElementById('passwordError').style.display = 'none';
+        }
+
+        function verifyAdminPassword(event) {
+            event.preventDefault();
+            const password = document.getElementById('adminPassword').value;
+            const errorMessage = document.getElementById('passwordError');
+
+            if (password === '20292029') {
+                localStorage.setItem('isAdmin', 'true');
+                window.location.href = 'admin.html';
+            } else {
+                errorMessage.style.display = 'block';
+            }
+        }
+
         // Fechar modal ao clicar fora
         window.onclick = function(event) {
             const modal = document.getElementById('loginModal');
             if (event.target === modal) {
                 closeLoginModal();
+            }
+            const adminModal = document.getElementById('adminLoginModal');
+            if (event.target === adminModal) {
+                closeAdminLoginModal();
             }
         }
 
