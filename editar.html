@@ -1180,7 +1180,12 @@
             const tbody = document.getElementById('woodTableBody');
             tbody.innerHTML = '';
 
-            woodData.forEach((wood, index) => {
+            // Ordenar os produtos em ordem alfabética por nome
+            const sortedWoodData = [...woodData].sort((a, b) => 
+                a.name.localeCompare(b.name, 'pt-BR')
+            );
+
+            sortedWoodData.forEach((wood, index) => {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td>

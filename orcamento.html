@@ -361,7 +361,12 @@ Forçar nos Tamanhos 4,0m / 4,5m / 5,0m / 6,0m"></textarea>
                 const produtosGrid = document.getElementById('produtosGrid');
                 produtosGrid.innerHTML = '';
                 
-                woodData.forEach(wood => {
+                // Ordenar os produtos em ordem alfabética por nome
+                const sortedWoodData = [...woodData].sort((a, b) => 
+                    a.name.localeCompare(b.name, 'pt-BR')
+                );
+                
+                sortedWoodData.forEach(wood => {
                     if (wood.visible) {
                         const produtoCard = document.createElement('div');
                         produtoCard.className = 'produto-card';

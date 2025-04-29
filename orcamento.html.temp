@@ -388,7 +388,12 @@
             const savedData = localStorage.getItem('woodData');
             const currentData = savedData ? JSON.parse(savedData) : woodData;
             
-            currentData.forEach(wood => {
+            // Ordenar os produtos em ordem alfabética por nome
+            const sortedData = [...currentData].sort((a, b) => 
+                a.name.localeCompare(b.name, 'pt-BR')
+            );
+            
+            sortedData.forEach(wood => {
                 if (wood.visible !== false) {
                     const card = document.createElement('div');
                     card.className = 'wood-card';

@@ -458,7 +458,12 @@
             const woodGrid = document.getElementById('woodGrid');
             woodGrid.innerHTML = '';
 
-            woodData.forEach(wood => {
+            // Ordenar os produtos em ordem alfabética por nome
+            const sortedWoodData = [...woodData].sort((a, b) => 
+                a.name.localeCompare(b.name, 'pt-BR')
+            );
+
+            sortedWoodData.forEach(wood => {
                 if (wood.visible) {
                     const card = document.createElement('div');
                     card.className = 'wood-card';
