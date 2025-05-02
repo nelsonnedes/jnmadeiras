@@ -264,25 +264,25 @@
 
         <div class="form-container">
             <h2>Solicitar Orçamento</h2>
-            <form id="orcamentoForm" onsubmit="enviarOrcamento(event)">
+            <form id="orcamentoForm" onsubmit="enviarOrcamento(event)" novalidate>
                 <div class="form-group">
                     <label for="nome">Nome:</label>
-                    <input type="text" id="nome" name="nome" required>
+                    <input type="text" id="nome" name="nome">
                 </div>
 
                 <div class="form-group">
                     <label for="telefone">Telefone:</label>
-                    <input type="tel" id="telefone" name="telefone" required>
+                    <input type="tel" id="telefone" name="telefone">
                 </div>
 
                 <div class="form-group">
                     <label for="estado">Estado:</label>
-                    <input type="text" id="estado" name="estado" required maxlength="2">
+                    <input type="text" id="estado" name="estado" maxlength="2">
                 </div>
 
                 <div class="form-group">
                     <label for="cidade">Cidade:</label>
-                    <input type="text" id="cidade" name="cidade" required>
+                    <input type="text" id="cidade" name="cidade">
                 </div>
 
                 <div class="form-group">
@@ -294,7 +294,7 @@
 
                 <div class="form-group">
                     <label for="pedido">Detalhes do Pedido:</label>
-                    <textarea id="pedido" name="pedido" required placeholder="Exemplo de preenchimento:
+                    <textarea id="pedido" name="pedido" placeholder="Exemplo de preenchimento:
 5m³ 5x20 Viga
 5m³ 5x12 Viga
 3m³ 5x10 Vigota
@@ -380,7 +380,7 @@ Forçar nos Tamanhos 4,0m / 4,5m / 5,0m / 6,0m"></textarea>
                             </div>
                             <div class="produto-quantidade" style="display: none;">
                                 <label>Quantidade (m³):</label>
-                                <input type="number" name="quantidade-${wood.name}" min="0" step="0.001" required>
+                                <input type="number" name="quantidade-${wood.name}" min="0" step="0.001">
                             </div>
                         `;
                         produtosGrid.appendChild(produtoCard);
@@ -403,11 +403,10 @@ Forçar nos Tamanhos 4,0m / 4,5m / 5,0m / 6,0m"></textarea>
             if (checkbox.checked) {
                 card.classList.add('selected');
                 quantidadeDiv.style.display = 'flex';
-                quantidadeInput.required = true;
             } else {
                 card.classList.remove('selected');
                 quantidadeDiv.style.display = 'none';
-                quantidadeInput.required = false;
+                quantidadeInput.value = '';
             }
         }
 
@@ -417,30 +416,48 @@ Forçar nos Tamanhos 4,0m / 4,5m / 5,0m / 6,0m"></textarea>
             showLoading(true);
             
             try {
+                // Verificar campos obrigatórios primeiro
+                const nome = document.getElementById('nome').value.trim();
+                const telefone = document.getElementById('telefone').value.trim();
+                const estado = document.getElementById('estado').value.trim();
+                const cidade = document.getElementById('cidade').value.trim();
+                const pedido = document.getElementById('pedido').value.trim();
+                
+                if (!nome || !telefone || !estado || !cidade || !pedido) {
+                    showStatus('Por favor, preencha todos os campos obrigatórios.', true);
+                    showLoading(false);
+                    return;
+                }
+                
+                // Verificar produtos selecionados
                 const produtos = [];
                 const cards = document.querySelectorAll('.produto-card');
                 let produtosSelecionados = false;
                 let quantidadesValidas = true;
+                let erroMensagem = '';
                 
                 console.log('Verificando produtos selecionados...');
                 cards.forEach(card => {
                     const checkbox = card.querySelector('input[type="checkbox"]');
-                    if (checkbox.checked) {
+                    if (checkbox && checkbox.checked) {
                         produtosSelecionados = true;
                         const quantidadeInput = card.querySelector('input[type="number"]');
-                        console.log(`Produto: ${checkbox.id.replace('produto-', '')}, Valor do input:`, quantidadeInput.value);
+                        const produtoNome = checkbox.id.replace('produto-', '');
+                        console.log(`Produto: ${produtoNome}, Valor do input:`, quantidadeInput.value);
                         
                         const quantidade = parseFloat(quantidadeInput.value);
                         
                         if (isNaN(quantidade) || quantidade <= 0) {
-                            console.error(`Quantidade inválida para ${checkbox.id.replace('produto-', '')}: ${quantidadeInput.value}`);
+                            console.error(`Quantidade inválida para ${produtoNome}: ${quantidadeInput.value}`);
                             quantidadesValidas = false;
+                            erroMensagem = `Quantidade inválida para ${produtoNome}`;
+                            
                             // Destacar campo inválido
                             quantidadeInput.style.borderColor = 'red';
                         } else {
                             quantidadeInput.style.borderColor = '#ddd';
                             produtos.push({
-                                nome: checkbox.id.replace('produto-', ''),
+                                nome: produtoNome,
                                 quantidade: quantidade
                             });
                         }
@@ -458,19 +475,19 @@ Forçar nos Tamanhos 4,0m / 4,5m / 5,0m / 6,0m"></textarea>
                 }
                 
                 if (!quantidadesValidas) {
-                    showStatus('Forneça uma quantidade válida para cada produto selecionado!', true);
+                    showStatus(erroMensagem || 'Forneça uma quantidade válida para cada produto selecionado!', true);
                     showLoading(false);
                     return;
                 }
 
                 const orcamento = {
-                    nome: document.getElementById('nome').value,
-                    telefone: document.getElementById('telefone').value,
-                    estado: document.getElementById('estado').value,
-                    cidade: document.getElementById('cidade').value,
+                    nome: nome,
+                    telefone: telefone,
+                    estado: estado,
+                    cidade: cidade,
                     produtos: produtos,
-                    pedido: document.getElementById('pedido').value,
-                    observacoes: document.getElementById('observacoes').value,
+                    pedido: pedido,
+                    observacoes: document.getElementById('observacoes').value.trim(),
                     data: new Date().toISOString(),
                     status: 'pendente'
                 };
@@ -482,12 +499,14 @@ Forçar nos Tamanhos 4,0m / 4,5m / 5,0m / 6,0m"></textarea>
                     .then((ref) => {
                         console.log('Orçamento enviado com sucesso! ID:', ref.key);
                         showStatus('Orçamento enviado com sucesso!');
-                        event.target.reset();
-                        // Desmarcar todos os checkboxes
+                        document.getElementById('orcamentoForm').reset();
+                        
+                        // Desmarcar todos os checkboxes e limpar quantidades
                         document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
                             checkbox.checked = false;
                             toggleProduto(checkbox, checkbox.id.replace('produto-', ''), 0);
                         });
+                        
                         // Redirecionar para a página inicial após 2 segundos
                         setTimeout(() => {
                             window.location.href = 'index.html';
