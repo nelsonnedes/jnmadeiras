@@ -1459,116 +1459,195 @@
 
         // Funções de Orçamentos
         function loadQuotes() {
-            const quotes = JSON.parse(localStorage.getItem('orcamentos') || '[]');
-            const tbody = document.getElementById('quotesList');
-            tbody.innerHTML = '';
-            
-            quotes.forEach((quote, index) => {
-                const tr = document.createElement('tr');
-                const date = new Date(quote.data).toLocaleDateString('pt-BR');
+            // Carregar orçamentos do Firebase em vez do localStorage
+            quotesRef.on('value', (snapshot) => {
+                const quotes = snapshot.val() || {};
+                const tbody = document.getElementById('quotesList');
+                tbody.innerHTML = '';
                 
-                tr.innerHTML = `
-                    <td>${date}</td>
-                    <td>${quote.nome}</td>
-                    <td>${quote.cidade}/${quote.estado}</td>
-                    <td>${quote.status}</td>
-                    <td class="action-buttons">
-                        <button class="view-button" onclick="viewQuote(${index})">
-                            <i class="fas fa-eye"></i> Ver
-                        </button>
-                        <button class="edit-button" onclick="editQuote(${index})">
-                            <i class="fas fa-edit"></i> Editar
-                        </button>
-                    </td>
-                `;
+                // Converter objeto de orçamentos em array
+                const quotesArray = Object.entries(quotes).map(([id, quote]) => ({
+                    id,
+                    ...quote
+                }));
                 
-                tbody.appendChild(tr);
+                // Ordenar por data (mais recentes primeiro)
+                quotesArray.sort((a, b) => new Date(b.data) - new Date(a.data));
+                
+                if (quotesArray.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="5" style="text-align: center;">Nenhum orçamento encontrado</td></tr>';
+                    return;
+                }
+                
+                quotesArray.forEach((quote) => {
+                    const tr = document.createElement('tr');
+                    const date = new Date(quote.data).toLocaleDateString('pt-BR');
+                    
+                    tr.innerHTML = `
+                        <td>${date}</td>
+                        <td>${quote.nome || 'N/A'}</td>
+                        <td>${quote.cidade || 'N/A'}/${quote.estado || 'N/A'}</td>
+                        <td>${quote.status || 'pendente'}</td>
+                        <td class="action-buttons">
+                            <button class="view-button" onclick="viewQuote('${quote.id}')">
+                                <i class="fas fa-eye"></i> Ver
+                            </button>
+                            <button class="edit-button" onclick="editQuote('${quote.id}')">
+                                <i class="fas fa-edit"></i> Editar
+                            </button>
+                        </td>
+                    `;
+                    
+                    tbody.appendChild(tr);
+                });
+            }, (error) => {
+                console.error('Erro ao carregar orçamentos:', error);
+                showStatus('Erro ao carregar orçamentos. Tente novamente.', true);
             });
         }
 
-        function viewQuote(index) {
-            const quotes = JSON.parse(localStorage.getItem('orcamentos') || '[]');
-            const quote = quotes[index];
-            const detail = document.getElementById('quoteDetail');
-            
-            detail.innerHTML = `
-                <div style="padding: 20px;">
-                    <h3>Informações do Cliente</h3>
-                    <p><strong>Nome:</strong> ${quote.nome}</p>
-                    <p><strong>Telefone:</strong> ${quote.telefone}</p>
-                    <p><strong>Localização:</strong> ${quote.cidade}/${quote.estado}</p>
-                    
-                    <h3>Espécies de Interesse</h3>
-                    <div style="margin: 10px 0;">
-                        ${quote.especies.map(especie => `
-                            <span style="display: inline-block; background: #f0f0f0; padding: 5px 10px; margin: 5px; border-radius: 4px;">
-                                ${especie}
-                            </span>
-                        `).join('')}
+        function viewQuote(quoteId) {
+            // Buscar orçamento do Firebase
+            quotesRef.child(quoteId).once('value').then((snapshot) => {
+                const quote = snapshot.val();
+                if (!quote) {
+                    showStatus('Orçamento não encontrado', true);
+                    return;
+                }
+                
+                const detail = document.getElementById('quoteDetail');
+                
+                // Construir a lista de produtos
+                let produtosHTML = '';
+                if (quote.produtos && quote.produtos.length > 0) {
+                    produtosHTML = quote.produtos.map(p => 
+                        `<span style="display: inline-block; background: #f0f0f0; padding: 5px 10px; margin: 5px; border-radius: 4px;">
+                            ${p.nome} - ${p.quantidade} m³
+                        </span>`
+                    ).join('');
+                } else if (quote.especies && quote.especies.length > 0) {
+                    // Compatibilidade com o formato antigo
+                    produtosHTML = quote.especies.map(especie => 
+                        `<span style="display: inline-block; background: #f0f0f0; padding: 5px 10px; margin: 5px; border-radius: 4px;">
+                            ${especie}
+                        </span>`
+                    ).join('');
+                }
+                
+                detail.innerHTML = `
+                    <div style="padding: 20px;">
+                        <h3>Informações do Cliente</h3>
+                        <p><strong>Nome:</strong> ${quote.nome || 'N/A'}</p>
+                        <p><strong>Telefone:</strong> ${quote.telefone || 'N/A'}</p>
+                        <p><strong>Localização:</strong> ${quote.cidade || 'N/A'}/${quote.estado || 'N/A'}</p>
+                        
+                        <h3>Produtos de Interesse</h3>
+                        <div style="margin: 10px 0;">
+                            ${produtosHTML || 'Nenhum produto selecionado'}
+                        </div>
+                        
+                        <h3>Detalhes do Pedido</h3>
+                        <p><strong>Pedido:</strong></p>
+                        <pre style="white-space: pre-wrap;">${quote.pedido || 'Sem detalhes'}</pre>
+                        
+                        <h3>Observações</h3>
+                        <pre style="white-space: pre-wrap;">${quote.observacoes || 'Nenhuma observação'}</pre>
                     </div>
-                    
-                    <h3>Detalhes do Pedido</h3>
-                    <p><strong>Pedido:</strong></p>
-                    <pre style="white-space: pre-wrap;">${quote.pedido}</pre>
-                    
-                    <h3>Observações</h3>
-                    <pre style="white-space: pre-wrap;">${quote.observacoes || 'Nenhuma observação'}</pre>
-                </div>
-            `;
-            
-            showModal('quoteDetailModal');
+                `;
+                
+                showModal('quoteDetailModal');
+            }).catch(error => {
+                console.error('Erro ao buscar orçamento:', error);
+                showStatus('Erro ao buscar detalhes do orçamento', true);
+            });
         }
 
-        function editQuote(index) {
-            const quotes = JSON.parse(localStorage.getItem('orcamentos') || '[]');
-            const quote = quotes[index];
-            currentEditingQuoteIndex = index;
-
-            // Preencher o formulário com os dados do orçamento
-            document.getElementById('editNome').value = quote.nome;
-            document.getElementById('editTelefone').value = quote.telefone;
-            document.getElementById('editEstado').value = quote.estado;
-            document.getElementById('editCidade').value = quote.cidade;
-            document.getElementById('editPedido').value = quote.pedido;
-            document.getElementById('editObservacoes').value = quote.observacoes || '';
-            document.getElementById('editContraProposta').value = quote.contraProposta || '';
-
-            // Preencher as espécies
-            const especiesDiv = document.getElementById('editEspecies');
-            especiesDiv.innerHTML = '';
-            
-            // Criar um mapa de espécies selecionadas para fácil acesso
-            const selectedSpeciesMap = new Map(
-                quote.especies.map(species => {
-                    const [name, price] = species.split(' - ');
-                    return [name, price];
-                })
-            );
-            
-            // Exibir apenas as espécies selecionadas
-            selectedSpeciesMap.forEach((price, name) => {
-                const div = document.createElement('div');
-                div.className = 'species-item';
+        function editQuote(quoteId) {
+            // Buscar orçamento do Firebase
+            quotesRef.child(quoteId).once('value').then((snapshot) => {
+                const quote = snapshot.val();
+                if (!quote) {
+                    showStatus('Orçamento não encontrado', true);
+                    return;
+                }
                 
-                div.innerHTML = `
-                    <input type="checkbox" 
-                           name="editSpecies" 
-                           value="${name}"
-                           id="edit_${name}"
-                           checked
-                           onchange="updateEditSpeciesSelection(this)">
-                    <label for="edit_${name}">
-                        ${name}
-                        <span class="price">${price}</span>
-                    </label>
-                `;
-                especiesDiv.appendChild(div);
+                // Preencher o formulário com os dados do orçamento
+                document.getElementById('editNome').value = quote.nome || '';
+                document.getElementById('editTelefone').value = quote.telefone || '';
+                document.getElementById('editEstado').value = quote.estado || '';
+                document.getElementById('editCidade').value = quote.cidade || '';
+                document.getElementById('editPedido').value = quote.pedido || '';
+                document.getElementById('editObservacoes').value = quote.observacoes || '';
+                document.getElementById('editContraProposta').value = quote.contraProposta || '';
+
+                // Preencher as espécies
+                const especiesDiv = document.getElementById('editEspecies');
+                especiesDiv.innerHTML = '';
+                
+                // Criar um mapa para os produtos
+                let produtosMap = new Map();
+                
+                // Verificar se temos produtos no formato novo (com nome e quantidade)
+                if (quote.produtos && quote.produtos.length > 0) {
+                    produtosMap = new Map(
+                        quote.produtos.map(p => [p.nome, p.quantidade])
+                    );
+                } 
+                // Compatibilidade com formato antigo (especies como string)
+                else if (quote.especies && quote.especies.length > 0) {
+                    produtosMap = new Map(
+                        quote.especies.map(species => {
+                            const [name, price] = species.split(' - ');
+                            return [name, price];
+                        })
+                    );
+                }
+                
+                // Atualizar o form com os produtos selecionados e buscar preços atualizados no woodData
+                if (woodData && woodData.length > 0) {
+                    // Ordenar por nome
+                    const sortedWoodData = [...woodData].sort((a, b) => 
+                        a.name.localeCompare(b.name, 'pt-BR')
+                    );
+                    
+                    sortedWoodData.forEach(wood => {
+                        if (wood.visible) {
+                            const isSelected = produtosMap.has(wood.name);
+                            const div = document.createElement('div');
+                            div.className = 'species-item';
+                            
+                            // Determinar o preço/quantidade a mostrar
+                            const valorProduto = isSelected 
+                                ? produtosMap.get(wood.name) 
+                                : formatCurrency(wood.price);
+                            
+                            div.innerHTML = `
+                                <input type="checkbox" 
+                                       name="editSpecies" 
+                                       value="${wood.name}"
+                                       id="edit_${wood.name}"
+                                       ${isSelected ? 'checked' : ''}
+                                       onchange="updateEditSpeciesSelection(this)">
+                                <label for="edit_${wood.name}">
+                                    ${wood.name}
+                                    <span class="price">${valorProduto}</span>
+                                </label>
+                            `;
+                            especiesDiv.appendChild(div);
+                        }
+                    });
+                } else {
+                    especiesDiv.innerHTML = '<p>Nenhum produto disponível no momento.</p>';
+                }
+
+                // Armazenar o ID do orçamento para referência
+                document.getElementById('editQuoteForm').dataset.orcamentoId = quoteId;
+
+                showModal('editQuoteModal');
+            }).catch(error => {
+                console.error('Erro ao buscar orçamento para edição:', error);
+                showStatus('Erro ao carregar orçamento para edição', true);
             });
-
-            // Armazenar o ID do orçamento para referência
-            document.getElementById('editQuoteForm').dataset.orcamentoId = quote.id;
-
-            showModal('editQuoteModal');
         }
 
         function saveChanges(event) {
@@ -1576,38 +1655,47 @@
             const form = document.getElementById('editQuoteForm');
             const orcamentoId = form.dataset.orcamentoId;
             
-            // Obter as espécies selecionadas com seus preços
+            if (!orcamentoId) {
+                showStatus('ID do orçamento não encontrado', true);
+                return;
+            }
+            
+            // Obter as espécies selecionadas com seus preços/quantidades
             const selectedSpecies = Array.from(document.querySelectorAll('#editQuoteForm input[name="editSpecies"]:checked'))
                 .map(cb => {
-                    const price = cb.parentElement.querySelector('.price').textContent;
-                    return `${cb.value} - ${price}`;
+                    const name = cb.value;
+                    const quantidade = cb.parentElement.querySelector('.price').textContent;
+                    return { nome: name, quantidade };
                 });
             
-            // Atualizar o orçamento no localStorage
-            let orcamentos = JSON.parse(localStorage.getItem('orcamentos') || '[]');
-            const index = orcamentos.findIndex(o => o.id === orcamentoId);
+            // Montar o objeto com os dados atualizados
+            const orcamentoAtualizado = {
+                nome: form.querySelector('#editNome').value,
+                telefone: form.querySelector('#editTelefone').value,
+                estado: form.querySelector('#editEstado').value,
+                cidade: form.querySelector('#editCidade').value,
+                // Manter compatibilidade com o formato antigo
+                especies: selectedSpecies.map(p => `${p.nome} - ${p.quantidade}`),
+                // Novo formato
+                produtos: selectedSpecies,
+                pedido: form.querySelector('#editPedido').value,
+                observacoes: form.querySelector('#editObservacoes').value,
+                contraProposta: form.querySelector('#editContraProposta').value,
+                dataAtualizacao: new Date().toISOString(),
+                status: 'atualizado'
+            };
             
-            if (index !== -1) {
-                orcamentos[index] = {
-                    ...orcamentos[index],
-                    nome: form.querySelector('#editNome').value,
-                    telefone: form.querySelector('#editTelefone').value,
-                    estado: form.querySelector('#editEstado').value,
-                    cidade: form.querySelector('#editCidade').value,
-                    especies: selectedSpecies,
-                    pedido: form.querySelector('#editPedido').value,
-                    observacoes: form.querySelector('#editObservacoes').value,
-                    contraProposta: form.querySelector('#editContraProposta').value,
-                    data: new Date().toISOString()
-                };
-                
-                localStorage.setItem('orcamentos', JSON.stringify(orcamentos));
-                alert('Orçamento atualizado com sucesso!');
-                closeModal('editQuoteModal');
-                loadQuotes();
-            } else {
-                alert('Erro ao encontrar o orçamento para atualização.');
-            }
+            // Atualizar no Firebase
+            quotesRef.child(orcamentoId).update(orcamentoAtualizado)
+                .then(() => {
+                    showStatus('Orçamento atualizado com sucesso!');
+                    closeModal('editQuoteModal');
+                    loadQuotes(); // Recarregar a lista
+                })
+                .catch(error => {
+                    console.error('Erro ao atualizar orçamento:', error);
+                    showStatus('Erro ao atualizar orçamento: ' + error.message, true);
+                });
         }
 
         function generateAndSendPDF(event) {
@@ -1890,9 +1978,6 @@
             const speciesGrid = form.querySelector('#editEspecies');
             speciesGrid.innerHTML = '';
             
-            // Carregar todas as espécies disponíveis
-            const woodData = JSON.parse(localStorage.getItem('woodData') || '[]');
-            
             // Criar um mapa de espécies selecionadas para fácil acesso
             const selectedSpeciesMap = new Map(
                 orcamento.especies.map(species => {
@@ -1901,30 +1986,42 @@
                 })
             );
             
-            woodData.forEach(wood => {
-                if (wood.visible) {
-                    const div = document.createElement('div');
-                    div.className = 'species-item';
-                    
-                    // Verificar se esta espécie está selecionada
-                    const isSelected = selectedSpeciesMap.has(wood.name);
-                    const price = isSelected ? selectedSpeciesMap.get(wood.name) : formatCurrency(wood.price);
-                    
-                    div.innerHTML = `
-                        <input type="checkbox" 
-                               name="editSpecies" 
-                               value="${wood.name}"
-                               id="edit_${wood.name}"
-                               ${isSelected ? 'checked' : ''}
-                               onchange="updateEditSpeciesSelection(this)">
-                        <label for="edit_${wood.name}">
-                            ${wood.name}
-                            <span class="price">${price}</span>
-                        </label>
-                    `;
-                    speciesGrid.appendChild(div);
-                }
-            });
+            // Usar woodData do Firebase (variável global já carregada)
+            // em vez de buscar do localStorage
+            if (woodData && woodData.length > 0) {
+                // Ordenar as espécies por nome para melhor usabilidade
+                const sortedWoodData = [...woodData].sort((a, b) => 
+                    a.name.localeCompare(b.name, 'pt-BR')
+                );
+                
+                sortedWoodData.forEach(wood => {
+                    if (wood.visible) {
+                        const div = document.createElement('div');
+                        div.className = 'species-item';
+                        
+                        // Verificar se esta espécie está selecionada
+                        const isSelected = selectedSpeciesMap.has(wood.name);
+                        const price = isSelected ? selectedSpeciesMap.get(wood.name) : formatCurrency(wood.price);
+                        
+                        div.innerHTML = `
+                            <input type="checkbox" 
+                                   name="editSpecies" 
+                                   value="${wood.name}"
+                                   id="edit_${wood.name}"
+                                   ${isSelected ? 'checked' : ''}
+                                   onchange="updateEditSpeciesSelection(this)">
+                            <label for="edit_${wood.name}">
+                                ${wood.name}
+                                <span class="price">${price}</span>
+                            </label>
+                        `;
+                        speciesGrid.appendChild(div);
+                    }
+                });
+            } else {
+                console.error('Erro: woodData não está disponível');
+                speciesGrid.innerHTML = '<p>Erro ao carregar espécies. Tente novamente mais tarde.</p>';
+            }
             
             // Armazenar o ID do orçamento para referência
             form.dataset.orcamentoId = orcamento.id;
