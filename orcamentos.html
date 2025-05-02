@@ -532,6 +532,7 @@
                 <button class="action-button" onclick="updateQuoteStatus('aprovado')">Aprovar</button>
                 <button class="action-button" onclick="updateQuoteStatus('rejeitado')">Rejeitar</button>
                 <button class="action-button" onclick="toggleContraProposta()">Contra Proposta</button>
+                <button class="action-button" onclick="gerarPDFOrcamento()">Gerar PDF</button>
                 <button class="action-button delete" onclick="deleteQuote()">Excluir</button>
             </div>
 
@@ -859,6 +860,86 @@
             if (quote.telefone) {
                 const whatsappLink = `https://wa.me/${quote.telefone.replace(/\D/g, '')}?text=Olá ${quote.nome || 'cliente'}, segue nossa contra proposta para seu orçamento.`;
                 window.open(whatsappLink, '_blank');
+            }
+        }
+
+        function gerarPDFOrcamento() {
+            if (!currentQuote) {
+                console.error('Dados do orçamento não disponíveis');
+                showStatus('Erro ao gerar PDF: dados do orçamento não disponíveis', true);
+                return;
+            }
+
+            try {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+                
+                // Título
+                doc.setFontSize(18);
+                doc.setFont('helvetica', 'bold');
+                doc.text('Detalhes do Orçamento', 105, 20, {align: 'center'});
+                
+                // Dados do orçamento
+                doc.setFontSize(12);
+                doc.setFont('helvetica', 'normal');
+                
+                let y = 40;
+                doc.text(`Data: ${formatDate(currentQuote.data)}`, 20, y); y += 10;
+                doc.text(`Nome: ${currentQuote.nome}`, 20, y); y += 10;
+                doc.text(`Telefone: ${currentQuote.telefone}`, 20, y); y += 10;
+                doc.text(`Cidade: ${currentQuote.cidade}`, 20, y); y += 10;
+                doc.text(`Estado: ${currentQuote.estado}`, 20, y); y += 10;
+                
+                // Produtos
+                doc.setFont('helvetica', 'bold');
+                doc.text('Produtos:', 20, y); y += 10;
+                doc.setFont('helvetica', 'normal');
+                
+                if (currentQuote.produtos && Array.isArray(currentQuote.produtos)) {
+                    currentQuote.produtos.forEach(produto => {
+                        doc.text(`${produto.nome} - ${produto.quantidade} m³`, 30, y);
+                        y += 8;
+                    });
+                }
+                
+                // Detalhes do Pedido
+                y += 5;
+                doc.setFont('helvetica', 'bold');
+                doc.text('Detalhes do Pedido:', 20, y); y += 10;
+                doc.setFont('helvetica', 'normal');
+                
+                const pedidoLines = doc.splitTextToSize(currentQuote.pedido, 170);
+                doc.text(pedidoLines, 20, y);
+                y += pedidoLines.length * 7 + 10;
+                
+                // Observações
+                if (currentQuote.observacoes) {
+                    doc.setFont('helvetica', 'bold');
+                    doc.text('Observações:', 20, y); y += 10;
+                    doc.setFont('helvetica', 'normal');
+                    
+                    const obsLines = doc.splitTextToSize(currentQuote.observacoes, 170);
+                    doc.text(obsLines, 20, y);
+                    y += obsLines.length * 7 + 10;
+                }
+                
+                // Status
+                doc.setFont('helvetica', 'bold');
+                doc.text('Status:', 20, y); y += 10;
+                doc.setFont('helvetica', 'normal');
+                doc.text(currentQuote.status || 'pendente', 20, y);
+                
+                // Rodapé
+                doc.setFontSize(10);
+                doc.text('JN Madeiras - Documento gerado em ' + new Date().toLocaleDateString(), 105, 280, {align: 'center'});
+                
+                // Salvar o PDF
+                doc.save(`orcamento_${currentQuoteId}.pdf`);
+                
+                showStatus('PDF gerado com sucesso!');
+            } catch (error) {
+                console.error('Erro ao gerar PDF:', error);
+                showStatus('Erro ao gerar PDF: ' + error.message, true);
             }
         }
 
