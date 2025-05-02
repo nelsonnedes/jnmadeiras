@@ -267,22 +267,22 @@
             <form id="orcamentoForm" onsubmit="enviarOrcamento(event)">
                 <div class="form-group">
                     <label for="nome">Nome:</label>
-                    <input type="text" id="nome" required>
+                    <input type="text" id="nome" name="nome" required>
                 </div>
 
                 <div class="form-group">
                     <label for="telefone">Telefone:</label>
-                    <input type="tel" id="telefone" required>
+                    <input type="tel" id="telefone" name="telefone" required>
                 </div>
 
                 <div class="form-group">
                     <label for="estado">Estado:</label>
-                    <input type="text" id="estado" required maxlength="2">
+                    <input type="text" id="estado" name="estado" required maxlength="2">
                 </div>
 
                 <div class="form-group">
                     <label for="cidade">Cidade:</label>
-                    <input type="text" id="cidade" required>
+                    <input type="text" id="cidade" name="cidade" required>
                 </div>
 
                 <div class="form-group">
@@ -294,7 +294,7 @@
 
                 <div class="form-group">
                     <label for="pedido">Detalhes do Pedido:</label>
-                    <textarea id="pedido" required placeholder="Exemplo de preenchimento:
+                    <textarea id="pedido" name="pedido" required placeholder="Exemplo de preenchimento:
 5m³ 5x20 Viga
 5m³ 5x12 Viga
 3m³ 5x10 Vigota
@@ -305,7 +305,7 @@
 
                 <div class="form-group">
                     <label for="observacoes">Observações:</label>
-                    <textarea id="observacoes" placeholder="Exemplo de preenchimento:
+                    <textarea id="observacoes" name="observacoes" placeholder="Exemplo de preenchimento:
 Forçar nos Tamanhos 4,0m / 4,5m / 5,0m / 6,0m"></textarea>
                 </div>
 
@@ -380,7 +380,7 @@ Forçar nos Tamanhos 4,0m / 4,5m / 5,0m / 6,0m"></textarea>
                             </div>
                             <div class="produto-quantidade" style="display: none;">
                                 <label>Quantidade (m³):</label>
-                                <input type="number" min="0" step="0.001" required>
+                                <input type="number" name="quantidade-${wood.name}" min="0" step="0.001" required>
                             </div>
                         `;
                         produtosGrid.appendChild(produtoCard);
@@ -398,78 +398,114 @@ Forçar nos Tamanhos 4,0m / 4,5m / 5,0m / 6,0m"></textarea>
         function toggleProduto(checkbox, nome, preco) {
             const card = checkbox.closest('.produto-card');
             const quantidadeDiv = card.querySelector('.produto-quantidade');
+            const quantidadeInput = quantidadeDiv.querySelector('input[type="number"]');
             
             if (checkbox.checked) {
                 card.classList.add('selected');
                 quantidadeDiv.style.display = 'flex';
+                quantidadeInput.required = true;
             } else {
                 card.classList.remove('selected');
                 quantidadeDiv.style.display = 'none';
+                quantidadeInput.required = false;
             }
         }
 
         function enviarOrcamento(event) {
             event.preventDefault();
+            console.log('Iniciando envio de orçamento...');
             showLoading(true);
             
-            const produtos = [];
-            const cards = document.querySelectorAll('.produto-card');
-            
-            cards.forEach(card => {
-                const checkbox = card.querySelector('input[type="checkbox"]');
-                if (checkbox.checked) {
-                    const quantidade = parseFloat(card.querySelector('input[type="number"]').value);
-                    if (quantidade > 0) {
-                        produtos.push({
-                            nome: checkbox.id.replace('produto-', ''),
-                            quantidade: quantidade
-                        });
+            try {
+                const produtos = [];
+                const cards = document.querySelectorAll('.produto-card');
+                let produtosSelecionados = false;
+                let quantidadesValidas = true;
+                
+                console.log('Verificando produtos selecionados...');
+                cards.forEach(card => {
+                    const checkbox = card.querySelector('input[type="checkbox"]');
+                    if (checkbox.checked) {
+                        produtosSelecionados = true;
+                        const quantidadeInput = card.querySelector('input[type="number"]');
+                        console.log(`Produto: ${checkbox.id.replace('produto-', '')}, Valor do input:`, quantidadeInput.value);
+                        
+                        const quantidade = parseFloat(quantidadeInput.value);
+                        
+                        if (isNaN(quantidade) || quantidade <= 0) {
+                            console.error(`Quantidade inválida para ${checkbox.id.replace('produto-', '')}: ${quantidadeInput.value}`);
+                            quantidadesValidas = false;
+                            // Destacar campo inválido
+                            quantidadeInput.style.borderColor = 'red';
+                        } else {
+                            quantidadeInput.style.borderColor = '#ddd';
+                            produtos.push({
+                                nome: checkbox.id.replace('produto-', ''),
+                                quantidade: quantidade
+                            });
+                        }
                     }
-                }
-            });
-
-            if (produtos.length === 0) {
-                showStatus('Selecione pelo menos um produto!', true);
-                showLoading(false);
-                return;
-            }
-
-            const orcamento = {
-                nome: document.getElementById('nome').value,
-                telefone: document.getElementById('telefone').value,
-                estado: document.getElementById('estado').value,
-                cidade: document.getElementById('cidade').value,
-                produtos: produtos,
-                pedido: document.getElementById('pedido').value,
-                observacoes: document.getElementById('observacoes').value,
-                data: new Date().toISOString(),
-                status: 'pendente'
-            };
-
-            console.log('Enviando orçamento:', orcamento);
-
-            quotesRef.push(orcamento)
-                .then((ref) => {
-                    console.log('Orçamento enviado com sucesso! ID:', ref.key);
-                    showStatus('Orçamento enviado com sucesso!');
-                    event.target.reset();
-                    // Desmarcar todos os checkboxes
-                    document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
-                        checkbox.checked = false;
-                        toggleProduto(checkbox, checkbox.id.replace('produto-', ''), 0);
-                    });
-                    // Redirecionar para a página inicial após 2 segundos
-                    setTimeout(() => {
-                        window.location.href = 'index.html';
-                    }, 2000);
-                })
-                .catch(error => {
-                    console.error('Erro ao enviar orçamento:', error);
-                    showStatus('Erro ao enviar orçamento. Tente novamente.', true);
-                })
-                .finally(() => {
-                    showLoading(false);
                 });
+
+                console.log('Produtos selecionados:', produtosSelecionados);
+                console.log('Quantidades válidas:', quantidadesValidas);
+                console.log('Lista de produtos:', produtos);
+
+                if (!produtosSelecionados) {
+                    showStatus('Selecione pelo menos um produto!', true);
+                    showLoading(false);
+                    return;
+                }
+                
+                if (!quantidadesValidas) {
+                    showStatus('Forneça uma quantidade válida para cada produto selecionado!', true);
+                    showLoading(false);
+                    return;
+                }
+
+                const orcamento = {
+                    nome: document.getElementById('nome').value,
+                    telefone: document.getElementById('telefone').value,
+                    estado: document.getElementById('estado').value,
+                    cidade: document.getElementById('cidade').value,
+                    produtos: produtos,
+                    pedido: document.getElementById('pedido').value,
+                    observacoes: document.getElementById('observacoes').value,
+                    data: new Date().toISOString(),
+                    status: 'pendente'
+                };
+
+                console.log('Orçamento montado:', orcamento);
+                console.log('Enviando para o Firebase...');
+
+                quotesRef.push(orcamento)
+                    .then((ref) => {
+                        console.log('Orçamento enviado com sucesso! ID:', ref.key);
+                        showStatus('Orçamento enviado com sucesso!');
+                        event.target.reset();
+                        // Desmarcar todos os checkboxes
+                        document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+                            checkbox.checked = false;
+                            toggleProduto(checkbox, checkbox.id.replace('produto-', ''), 0);
+                        });
+                        // Redirecionar para a página inicial após 2 segundos
+                        setTimeout(() => {
+                            window.location.href = 'index.html';
+                        }, 2000);
+                    })
+                    .catch(error => {
+                        console.error('Erro ao enviar orçamento:', error);
+                        console.error('Detalhes do erro:', error.code, error.message);
+                        showStatus(`Erro ao enviar orçamento: ${error.message}. Tente novamente.`, true);
+                    })
+                    .finally(() => {
+                        showLoading(false);
+                    });
+            } catch (err) {
+                console.error('Erro inesperado:', err);
+                showStatus(`Erro inesperado: ${err.message}. Tente novamente.`, true);
+                showLoading(false);
+            }
         }
 
         // Inicialização
