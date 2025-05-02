@@ -1159,14 +1159,44 @@
         }
 
         function unformatNumber(value) {
-            return parseFloat(value.replace(/[^\d,.-]/g, '').replace(',', '.'));
+            console.log('Valor original:', value);
+            // Remover qualquer caractere que não seja dígito, vírgula, ponto ou sinal
+            const cleanValue = value.replace(/[^\d,.+-]/g, '');
+            console.log('Após remover caracteres inválidos:', cleanValue);
+            
+            // Substituir vírgula por ponto para conversão correta para número
+            const normalizedValue = cleanValue.replace(/,/g, '.');
+            console.log('Após normalizar separador decimal:', normalizedValue);
+            
+            // Converter para número
+            const numericValue = parseFloat(normalizedValue);
+            console.log('Valor numérico final:', numericValue);
+            
+            return numericValue;
         }
 
         function loadWoodData() {
             woodRef.on('value', (snapshot) => {
                 woodData = snapshot.val() || [];
                 renderTable();
+                
+                // Verificar especificamente a Maçaranduba
+                checkMacaranduba();
             });
+        }
+        
+        function checkMacaranduba() {
+            console.log('Verificando dados da Maçaranduba:');
+            const macaranduba = woodData.find(wood => wood.name === 'Maçaranduba');
+            
+            if (macaranduba) {
+                console.log('Maçaranduba encontrada no índice:', woodData.indexOf(macaranduba));
+                console.log('Dados completos:', macaranduba);
+                console.log('Tipo do preço:', typeof macaranduba.price);
+                console.log('Valor do preço:', macaranduba.price);
+            } else {
+                console.log('Maçaranduba não encontrada na lista de produtos');
+            }
         }
 
         function loadPromoText() {
@@ -1180,30 +1210,37 @@
             const tbody = document.getElementById('woodTableBody');
             tbody.innerHTML = '';
 
-            // Ordenar os produtos em ordem alfabética por nome
-            const sortedWoodData = [...woodData].sort((a, b) => 
-                a.name.localeCompare(b.name, 'pt-BR')
+            // Criar um mapeamento de índices ordenados para índices originais
+            const originalIndices = woodData.map((_, index) => index);
+            
+            // Ordenar os produtos em ordem alfabética por nome, mas manter referência ao índice original
+            const sortedData = woodData.map((wood, index) => ({ 
+                wood, 
+                originalIndex: index 
+            })).sort((a, b) => 
+                a.wood.name.localeCompare(b.wood.name, 'pt-BR')
             );
 
-            sortedWoodData.forEach((wood, index) => {
+            // Renderizar a tabela usando os índices originais para as operações de atualização
+            sortedData.forEach(({ wood, originalIndex }) => {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td>
                         <input type="text" 
                                value="${wood.name || ''}"
-                               onchange="updateName(${index}, this.value)">
+                               onchange="updateName(${originalIndex}, this.value)">
                     </td>
                     <td>
                         <input type="text" 
                                value="${formatVolume(wood.quantidadeTora || 0)}"
-                               onchange="updateTora(${index}, this.value)">
+                               onchange="updateTora(${originalIndex}, this.value)">
                     </td>
                     <td>
                         <input type="number" 
                                min="0" 
                                max="100" 
                                value="${wood.porcentagem || 0}" 
-                               onchange="updatePorcentagem(${index}, this.value)">
+                               onchange="updatePorcentagem(${originalIndex}, this.value)">
                     </td>
                     <td>
                         <input type="text" 
@@ -1213,15 +1250,15 @@
                     <td>
                         <input type="text" 
                                value="${formatCurrency(wood.price || 0)}"
-                               onchange="updatePrice(${index}, this.value)">
+                               onchange="updatePrice(${originalIndex}, this.value)">
                     </td>
                     <td>
                         <input type="checkbox" 
                                ${wood.visible ? 'checked' : ''} 
-                               onchange="updateVisibility(${index}, this.checked)">
+                               onchange="updateVisibility(${originalIndex}, this.checked)">
                     </td>
                     <td>
-                        <button class="delete-button" onclick="excluirItem(${index})">Excluir</button>
+                        <button class="delete-button" onclick="excluirItem(${originalIndex})">Excluir</button>
                     </td>
                 `;
                 tbody.appendChild(tr);
@@ -1257,8 +1294,32 @@
         }
 
         function updatePrice(index, value) {
-            woodData[index].price = unformatNumber(value);
-            woodRef.set(woodData);
+            console.log('Atualizando preço para o produto de índice', index);
+            console.log('Nome do produto:', woodData[index].name);
+            console.log('Preço anterior:', woodData[index].price);
+            
+            const newPrice = unformatNumber(value);
+            console.log('Novo preço calculado:', newPrice);
+            
+            if (isNaN(newPrice)) {
+                console.error('Erro: o valor convertido é NaN');
+                showStatus('Erro ao atualizar o preço. Formato inválido.', true);
+                return;
+            }
+            
+            woodData[index].price = newPrice;
+            console.log('Preço atualizado no objeto woodData:', woodData[index].price);
+            
+            // Salvar no Firebase
+            woodRef.set(woodData)
+                .then(() => {
+                    console.log('Preço salvo com sucesso no Firebase');
+                    showStatus('Preço atualizado com sucesso!');
+                })
+                .catch(error => {
+                    console.error('Erro ao salvar no Firebase:', error);
+                    showStatus('Erro ao salvar no Firebase: ' + error.message, true);
+                });
         }
 
         function updateVisibility(index, visible) {
